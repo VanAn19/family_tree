@@ -1,0 +1,40 @@
+.user {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.icon {
+    display: flex;
+    justify-content: end;
+    font-size: 12px;
+    cursor: pointer;
+    margin-bottom: 5px
+}
+
+.node {
+    padding: 5px 3px;
+    background-color: #fff;
+    border-radius: 5px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.nodeChild {
+    text-decoration: none;
+    margin: auto 3px;
+}
+
+.nodeChild:hover {
+    text-decoration: none;
+}
+
+.settingsIcon {
+    margin: auto 0;
+    cursor: pointer;
+}
+
+.customMenuList {
+    width: 33.33%;
+}

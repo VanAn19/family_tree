@@ -4,13 +4,14 @@ const { where } = require('sequelize');
 const { BadRequestError, NotFoundError } = require('../core/error.response');
 const { FamilyTree, FamilyMember } = require('../models');
 const { Op } = require('sequelize');
-const { findAllMemberByFamilyTreeId } = require('../repositories/familyMember.repo');
+const { findAllMemberByFamilyTreeId, deleteDescendants } = require('../repositories/familyMember.repo');
+const { Sequelize } = require('sequelize');
 
 class FamilyMemberService {
 
     static addPartner = async (payload) => {
         const {
-            familyTreeId, partnerId, name, citizenIdentification,
+            familyTreeId, partnerId, childrenId, name, citizenIdentification,
             dateOfBirth, gender, avatar, job, isAlive, deathOfBirth
         } = payload
         const members = await findAllMemberByFamilyTreeId({familyTreeId: familyTreeId});
@@ -21,6 +22,7 @@ class FamilyMemberService {
         const newPartner = await FamilyMember.create({
             familyTreeId,
             partnerId,
+            childrenId,
             name,
             citizenIdentification,
             dateOfBirth,
@@ -56,36 +58,54 @@ class FamilyMemberService {
     }
 
     static deleteMember = async ({ id, familyTreeId }) => {
-        const foundMembers = await FamilyMember.findAll({ where: {
-            [Op.or]: [
-                { fatherId: id },
-                { motherId: id },
-                { partnerId: id }
-            ]
-        } });
-        console.log("---------------------------------------");
-        console.log("foundMembers::::::::::::", foundMembers);
-        console.log("---------------------------------------");
-        if (foundMembers.length === 0) throw new NotFoundError('Not found any member');
-        for (const foundMember of foundMembers) {
-            if (foundMember.fatherId === id) foundMember.fatherId = null;
-            if (foundMember.motherId === id) foundMember.motherId = null;
-            if (foundMember.partnerId === id) foundMember.partnerId = null;
-            await foundMember.save();
+        /*
+            1: Tìm thành viên cần xóa
+            2: Xóa partner 
+            3: Tìm và xóa các thành viên con
+            4: Xóa từng thành viên con (nếu có)
+            5: Xóa thành viên cần xóa
+        */ 
+        // 1
+        const memberDelete = await FamilyMember.findOne({ where: { id, familyTreeId } });
+        if (!memberDelete) throw new NotFoundError('Member not found');
+
+        // 2
+        if (memberDelete.partnerId) {
+            const partnerDelete = await FamilyMember.findOne({ where: { id: memberDelete.partnerId, familyTreeId } });
+            if (partnerDelete) {
+                await partnerDelete.destroy();
+            }
         }
-        return await FamilyMember.destroy({ where: {id} });
+
+        // const childrenIds = JSON.parse(memberDelete.childrenId) || [];
+        // let childrenMembers = [];
+        // if (childrenIds.length > 0) {
+        //     childrenMembers = await FamilyMember.findAll({
+        //         where: {
+        //             id: {
+        //                 [Op.in]: childrenIds 
+        //             },
+        //             familyTreeId 
+        //         }
+        //     });
+        // }
+
+        await deleteDescendants(memberDelete);
+        return await memberDelete.destroy();
     }
 
     static addChild = async (payload) => {
         const {
-            familyTreeId, fatherId, motherId, name, citizenIdentification,
+            familyTreeId, fatherId, motherId, childrenId, name, citizenIdentification,
             dateOfBirth, gender, avatar, job, isAlive, deathOfBirth
         } = payload
         const foundMember = await FamilyMember.findOne({ where: {id: fatherId}});
+        const foundMotherMember = await FamilyMember.findOne({ where: {id: foundMember.partnerId}});
         const newChild = await FamilyMember.create({
             familyTreeId,
             fatherId,
             motherId: foundMember.partnerId,
+            childrenId,
             name,
             citizenIdentification,
             dateOfBirth,
@@ -95,11 +115,30 @@ class FamilyMemberService {
             isAlive,
             deathOfBirth
         });
+        await foundMember.update({
+            childrenId: Sequelize.fn('JSON_ARRAY_APPEND', Sequelize.col('childrenId'), '$', newChild.id)
+        });
+        if (foundMotherMember) {
+            await foundMotherMember.update({
+                childrenId: Sequelize.fn('JSON_ARRAY_APPEND', Sequelize.col('childrenId'), '$', newChild.id)
+            });
+        }
         return newChild
     }
 
     static getFamilyMember = async ({ familyTreeId }) => {
         return await findAllMemberByFamilyTreeId({ familyTreeId });
+    }
+
+    static getMemberById = async ({ id }) => {
+        return await FamilyMember.findOne({ where: {id} })
+    }
+
+    static getAncestor = async ({ familyTreeId }) => {
+        return await FamilyMember.findOne({ where: {
+            familyTreeId,
+            isAncestor: true
+        }})
     }
 
 }

@@ -24,7 +24,6 @@ export const authSlice = createSlice({
       // state.token = action.payload.metadata.tokens.accessToken
       localStorage.clear();
       const { user, tokens } = action.payload.metadata; 
-      console.log(user);
       state.user = user;
       state.token = tokens.accessToken;
     },

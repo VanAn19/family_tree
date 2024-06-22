@@ -3,6 +3,7 @@
 const { BadRequestError } = require('../core/error.response');
 const { FamilyTree, FamilyMember } = require('../models');
 const { getInfoData } = require('../utils');
+const { findAllFamilyTreeByUserId } = require('../repositories/familyTree.repo')
 
 class FamilyTreeService {
     
@@ -14,8 +15,8 @@ class FamilyTreeService {
         }
     }
 
-    static getAllFamilyTree = async () => {
-        const foundFamilyTree = await FamilyTree.findAll();
+    static getAllFamilyTree = async ({ userCreateId }) => {
+        const foundFamilyTree = await findAllFamilyTreeByUserId({userCreateId});
         return {
             familyTree: getInfoData({ fields: ['id', 'name', 'ancestorName'], object: foundFamilyTree})
         }
@@ -30,7 +31,7 @@ class FamilyTreeService {
         });
         if (foundTree) throw new BadRequestError('Family tree name already exists!');
         const newFamilyTree = await FamilyTree.create({ name, userCreateId, ancestorName });
-        await FamilyMember.create({ name: ancestorName, gender: "Nam", familyTreeId: newFamilyTree.id });
+        await FamilyMember.create({ name: ancestorName, gender: "Nam", familyTreeId: newFamilyTree.id, isAncestor: true });
         return newFamilyTree
     }
 
@@ -42,7 +43,8 @@ class FamilyTreeService {
         return foundTree;
     }
 
-    static deleteFamilyTree = async ({ id  }) => {
+    static deleteFamilyTree = async ({ id }) => {
+        await FamilyMember.destroy({ where: {familyTreeId: id} });
         return await FamilyTree.destroy({ where: {id} });
     }
 

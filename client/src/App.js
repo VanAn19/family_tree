@@ -5,6 +5,7 @@ import Intro from './components/intro/Intro'
 import Login from './components/login/Login'
 import Register from './components/register/Register'
 import Home from './components/home/Home'
+import NavBar from './components/navbar/NavBar';
 
 function App() {
   const { user } = useSelector((state) => state.auth)
@@ -15,6 +16,7 @@ function App() {
         <Route path='/login' element={!user ? <Login /> : <Navigate to='/home' />} />
         <Route path='/register' element={!user ? <Register /> : <Navigate to='/home' />} />
         <Route path='/home' element={ user ? <Home /> : <Navigate to='/login' />} />
+        <Route path='/home/:familyTreeId' element={ user ? <Home /> : <Navigate to='/login' />} />
      </Routes>
     </div>
   );

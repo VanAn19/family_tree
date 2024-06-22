@@ -7,7 +7,7 @@ class FamilyTreeController {
 
     deleteFamilyTree = async (req,res,next) => {
         new SuccessResponse({
-            message: 'Update family tree successfully!',
+            message: 'Delete family tree successfully!',
             metadata: await FamilyTreeService.deleteFamilyTree({ id: req.params.id })
         }).send(res)
     }
@@ -43,7 +43,9 @@ class FamilyTreeController {
     getAllFamilyTree = async (req,res,next) => {
         new SuccessResponse({
             message: 'Get all family tree successfully!',
-            metadata: await FamilyTreeService.getAllFamilyTree()
+            metadata: await FamilyTreeService.getAllFamilyTree({
+                userCreateId: req.user.userId
+            })
         }).send(res)
     }
 

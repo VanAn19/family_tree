@@ -25,6 +25,10 @@ module.exports = {
       partnerId: {
         type: Sequelize.INTEGER
       },
+      childrenId: {
+        type: Sequelize.JSON,
+        defaultValue: []
+      },
       name: {
         type: Sequelize.STRING
       },
@@ -48,6 +52,10 @@ module.exports = {
       },
       deathOfBirth: {
         type: Sequelize.DATE
+      },
+      isAncestor: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,

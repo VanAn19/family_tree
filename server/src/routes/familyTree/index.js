@@ -12,7 +12,6 @@ router.get('/', asyncHandler(familyTreeController.getAllFamilyTree));
 router.get('/:id', asyncHandler(familyTreeController.getFamilyTree));
 router.post('/create', asyncHandler(familyTreeController.createFamilyTree));
 router.patch('/update/:id', asyncHandler(familyTreeController.updateFamilyTree));
-router.post('/delete/:id', asyncHandler(familyTreeController.deleteFamilyTree));
-router.post('/:id/add-member', asyncHandler(familyTreeController.addMemberToFamily));
+router.delete('/delete/:id', asyncHandler(familyTreeController.deleteFamilyTree));
 
 module.exports = router;

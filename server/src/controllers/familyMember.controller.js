@@ -50,9 +50,27 @@ class FamilyTreeController {
 
     getFamilyMember = async (req,res,next) => {
         new SuccessResponse({
-            message: 'Add child successfully!',
+            message: 'Get all members successfully!',
             metadata: await FamilyMemberService.getFamilyMember({
                 familyTreeId: req.params.familyTreeId
+            })
+        }).send(res)
+    }
+
+    getMemberById = async (req,res,next) => {
+        new SuccessResponse({
+            message: 'Get member successfully!',
+            metadata: await FamilyMemberService.getMemberById({
+                id: req.params.id
+            })
+        }).send(res)
+    }
+
+    getAncestor = async (req,res,next) => {
+        new SuccessResponse({
+            message: 'Get ancestor successfully!',
+            metadata: await FamilyMemberService.getAncestor({
+                familyTreeId: req.params.familyTreeId,
             })
         }).send(res)
     }

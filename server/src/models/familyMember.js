@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
     fatherId: DataTypes.INTEGER,
     motherId: DataTypes.INTEGER,
     partnerId: DataTypes.INTEGER,
+    childrenId: {
+      type: DataTypes.JSON,
+      defaultValue: []
+    },
     name: DataTypes.STRING,
     citizenIdentification: DataTypes.STRING,
     dateOfBirth: DataTypes.DATE,
@@ -35,6 +39,7 @@ module.exports = (sequelize, DataTypes) => {
     job: DataTypes.STRING,
     isAlive: DataTypes.BOOLEAN,
     deathOfBirth: DataTypes.STRING,
+    isAncestor: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'FamilyMember',
