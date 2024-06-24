@@ -38,3 +38,7 @@
 .customMenuList {
     width: 33.33%;
 }
+
+.selectedNode {
+    background-color: #ccc;
+}

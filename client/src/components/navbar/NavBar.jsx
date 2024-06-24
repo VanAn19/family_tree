@@ -13,6 +13,7 @@ const NavBar = () => {
   const [isAddFamilyTreeModalOpen, setIsAddFamilyTreeModalOpen] = useState(false);
   const [editingTreeId, setEditingTreeId] = useState(null);
   const [editingTreeName, setEditingTreeName] = useState('');
+  const [selectedTreeId, setSelectedTreeId] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, token } = useSelector(state => state.auth);
@@ -59,6 +60,7 @@ const NavBar = () => {
   }, [user.id, token]);
 
   const handleSelectTree = (id) => {
+    setSelectedTreeId(id);
     navigate(`/home/${id}`);
   };
 
@@ -97,8 +99,6 @@ const NavBar = () => {
   };
 
   const handleLogout = async () => {
-    // dispatch(logout()); 
-    // navigate('/login'); 
     try {
       await axios.post(`http://localhost:4000/v1/api/logout`, {}, {
         headers: {
@@ -122,7 +122,10 @@ const NavBar = () => {
         </div>
         <List spacing={3}>
           {familyTrees.map(tree => (
-            <ListItem key={tree.id} className={classes.node}>
+            <ListItem 
+              key={tree.id} 
+              className={`${classes.node} ${selectedTreeId === tree.id ? classes.selectedNode : ''}`}
+            >
               {editingTreeId === tree.id ? (
                 <Input
                   value={editingTreeName}

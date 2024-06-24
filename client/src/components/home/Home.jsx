@@ -110,7 +110,7 @@ const Home = () => {
   
   const handleSubmitAddPartner = async (formData) => {
     try {
-      const res = await axios.post(`http://localhost:4000/v1/api/family-member/${familyTreeId}/add-partner`,
+      await axios.post(`http://localhost:4000/v1/api/family-member/${familyTreeId}/add-partner`,
         {
           ...formData,
           familyTreeId,
@@ -123,7 +123,6 @@ const Home = () => {
           }
         }
       );
-      console.log(res);
       fetchFamilyTree(familyTreeId);
       closeAddPartnerModal();
     } catch (error) {
@@ -141,7 +140,7 @@ const Home = () => {
 
   const handleSubmitAddChild = async (formData) => {
     try {
-      const res = await axios.post(`http://localhost:4000/v1/api/family-member/${familyTreeId}/add-child`,
+      await axios.post(`http://localhost:4000/v1/api/family-member/${familyTreeId}/add-child`,
   {
           ...formData,
           familyTreeId,
@@ -154,7 +153,6 @@ const Home = () => {
           }
         }
       );
-      console.log(res);
       fetchFamilyTree(familyTreeId);
       closeAddChildModal();
     } catch (error) {
@@ -251,7 +249,8 @@ const Home = () => {
             />
           </Suspense>
         ) : (
-          <div>Please select a family tree.</div>
+          // <div>Please select a family tree.</div>
+          <h1 style={{textAlign: "center", color: "#fff", marginTop: "100px"}}>Chọn cây của bạn, nếu chưa có hãy tạo mới.</h1>
         )}
         {isOpen && (
           <NodeContextMenu
