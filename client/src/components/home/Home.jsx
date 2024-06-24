@@ -8,7 +8,6 @@ import NodeModalEditInfo from "../NodeModal/NodeModalEditInfo";
 import NodeContextMenu from "../NodeContextMenu/NodeContextMenu";
 import NavBar from "../navbar/NavBar";
 import { useSelector } from "react-redux";
-import { v4 } from "uuid";
 import { useParams } from "react-router-dom";
 import { useDisclosure } from "@chakra-ui/react"; 
 import image from "../../assets/node.jpg"
@@ -219,7 +218,7 @@ const Home = () => {
   const renderRectSvgNode = ({ nodeDatum }, click) => (
     <g onClick={(event) => click(nodeDatum, event)}>
       <image href={image} width="200" height="100" x="-100" y="-70" />
-      <text fill="black" x="-5" y="-15" fontSize="12">{`${nodeDatum.name}`}</text>
+      <text fill="black" x="0" y="-15" fontSize="12" textAnchor="middle">{`${nodeDatum.name}`}</text>
       {/* <text fill="black" x="-95" y="15" fontSize="12">{`Gender: ${nodeDatum.gender}`}</text> */}
       {nodeDatum.attributes && (
         <>

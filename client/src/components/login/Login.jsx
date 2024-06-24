@@ -81,7 +81,7 @@ const Login = () => {
           </label>
           <button className={classes.submitBtn}>Đăng nhập</button>
           <Link to="/register">
-            Chưa có tài khoản? <p className={classes.register}>Đăng kí tại đây</p>
+            Chưa có tài khoản? <p className={classes.register}>Đăng kí</p>
           </Link>
         </form>
         {error && (

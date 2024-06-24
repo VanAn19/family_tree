@@ -8,57 +8,70 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/modal";
-import { FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
-import React, { useState } from "react";
+import { FormControl, FormLabel, Input } from "@chakra-ui/react";
+import React from "react";
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import classes from "./NodeModal.module.css";
+
+const schema = yup.object().shape({
+  name: yup.string()
+    .required('Tên gia phả là bắt buộc')
+    .max(50, 'Tên gia phả không được vượt quá 50 ký tự'),
+  ancestorName: yup.string().required('Họ tên tổ tiên là bắt buộc')
+});
 
 const NodeModalAddFamilyTree = ({ isOpen, onClose, onSubmit }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    ancestorName: ""
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+  const handleFormSubmit = (data) => {
+    onSubmit(data);
+    reset();
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader sx={{borderBottom: '1px solid #ccc'}}>Tạo cây mới</ModalHeader>
+        <ModalHeader sx={{ borderBottom: '1px solid #ccc' }}>Tạo cây mới</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <FormControl>
-            <FormLabel>Tên gia phả</FormLabel>
-            <Input
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Họ tên tổ tiên</FormLabel>
-            <Input
-              name="ancestorName"
-              value={formData.ancestorName}
-              onChange={handleChange}
-            />
-          </FormControl>
+          <form onSubmit={handleSubmit(handleFormSubmit)}>
+            <FormControl isInvalid={errors.name}>
+              <FormLabel>Tên gia phả</FormLabel>
+              <Input
+                name="name"
+                {...register('name')}
+              />
+              {errors.name && <p className={classes.error}>{errors.name.message}</p>}
+            </FormControl>
+            <FormControl isInvalid={errors.ancestorName}>
+              <FormLabel>Họ tên tổ tiên</FormLabel>
+              <Input
+                name="ancestorName"
+                {...register('ancestorName')}
+              />
+              {errors.ancestorName && <p className={classes.error}>{errors.ancestorName.message}</p>}
+            </FormControl>
+            <ModalFooter>
+              <Button
+                color="blue.500"
+                variant="solid"
+                type="submit"
+              >
+                Thêm
+              </Button>
+            </ModalFooter>
+          </form>
         </ModalBody>
-        <ModalFooter>
-          <Button
-            color="blue.500"
-            variant="solid"
-            onClick={() => onSubmit(formData)}
-            disabled={!formData.name}
-          >
-            Thêm
-          </Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );

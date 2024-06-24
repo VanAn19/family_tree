@@ -9,6 +9,7 @@ const { createTokenPair } = require('../auth/authUtils');
 const { getInfoData } = require('../utils');
 const { findByUsername } = require('./user.service');
 const { Sequelize } = require('sequelize');
+const { Op } = require('sequelize');
 
 class AccessService {
 
@@ -62,7 +63,11 @@ class AccessService {
     
     static signUp = async ({ username, password, name, email }) => {
         try {
-            const holderUser = await User.findOne({ where: { username: username } });
+            const holderUser = await User.findOne({ 
+                where: {
+                    [Op.or]: [{ username: username }, { email: email }]
+                }
+            });
             if (holderUser) throw new BadRequestError('Error: Username already registered!');
             const passwordHash = await bcrypt.hash(password, 10);
             const newUser = await User.create({ username, password: passwordHash, name, email });
