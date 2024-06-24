@@ -49,6 +49,8 @@ const schema = yup.object().shape({
 });
 
 const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
+  const [isAlive, setIsAlive] = useState('true');
+
   const {
     register,
     handleSubmit,
@@ -61,6 +63,10 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
   const handleFormSubmit = (data) => {
     onSubmit(data);
     reset();
+  };
+
+  const handleIsAliveChange = (e) => {
+    setIsAlive(e.target.value);
   };
 
   return (
@@ -113,21 +119,37 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
                 placeholder=" "
                 name="isAlive"
                 {...register('isAlive')}
+                onChange={handleIsAliveChange}
               >
                 <option value="true">Còn sống</option>
                 <option value="false">Đã mất</option>
               </Select>
               {errors.isAlive && <p className={classes.error}>{errors.isAlive.message}</p>}
             </FormControl>
-            <FormControl>
+            {/* <FormControl>
               <FormLabel>Ngày mất</FormLabel>
               <Input
                 type="date"
                 name="deathOfBirth"
                 {...register('deathOfBirth')}
+                disabled={isAlive === 'true'}
               />
               {errors.deathOfBirth && <p className={classes.error}>{errors.deathOfBirth.message}</p>}
-            </FormControl>
+            </FormControl> */}
+            {isAlive === 'false' ? (
+              <FormControl>
+                <FormLabel>Ngày mất</FormLabel>
+                <Input
+                  type="date"
+                  name="deathOfBirth"
+                  {...register('deathOfBirth')}
+                  disabled={isAlive === 'true'}
+                />
+                {errors.deathOfBirth && <p className={classes.error}>{errors.deathOfBirth.message}</p>}
+              </FormControl>
+            ) : (
+              <div></div>
+            )}
             <ModalFooter>
               <Button
                 color="blue.500"

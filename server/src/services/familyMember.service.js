@@ -96,30 +96,49 @@ class FamilyMemberService {
 
     static addChild = async (payload) => {
         const {
-            familyTreeId, fatherId, motherId, childrenId, name, citizenIdentification,
+            familyTreeId, id, childrenId, name, citizenIdentification,
             dateOfBirth, gender, avatar, job, isAlive, deathOfBirth
         } = payload
-        const foundMember = await FamilyMember.findOne({ where: {id: fatherId}});
-        const foundMotherMember = await FamilyMember.findOne({ where: {id: foundMember.partnerId}});
-        const newChild = await FamilyMember.create({
-            familyTreeId,
-            fatherId,
-            motherId: foundMember.partnerId,
-            childrenId,
-            name,
-            citizenIdentification,
-            dateOfBirth,
-            gender,
-            avatar,
-            job,
-            isAlive,
-            deathOfBirth
-        });
+        const foundMember = await FamilyMember.findOne({ where: {id} });
+        const foundPartnerMember = await FamilyMember.findOne({ where: {id: foundMember.partnerId}});
+        let newChild;
+        if (foundMember.gender === "Nam") {
+            newChild = await FamilyMember.create({
+                familyTreeId,
+                fatherId: id,
+                motherId: foundMember.partnerId,
+                childrenId,
+                name,
+                citizenIdentification,
+                dateOfBirth,
+                gender,
+                avatar,
+                job,
+                isAlive,
+                deathOfBirth
+            });
+        }
+        if (foundMember.gender === "Nữ") {
+            newChild = await FamilyMember.create({
+                familyTreeId,
+                fatherId: foundMember.partnerId,
+                motherId: id,
+                childrenId,
+                name,
+                citizenIdentification,
+                dateOfBirth,
+                gender,
+                avatar,
+                job,
+                isAlive,
+                deathOfBirth
+            });
+        }
         await foundMember.update({
             childrenId: Sequelize.fn('JSON_ARRAY_APPEND', Sequelize.col('childrenId'), '$', newChild.id)
         });
-        if (foundMotherMember) {
-            await foundMotherMember.update({
+        if (foundPartnerMember) {
+            await foundPartnerMember.update({
                 childrenId: Sequelize.fn('JSON_ARRAY_APPEND', Sequelize.col('childrenId'), '$', newChild.id)
             });
         }

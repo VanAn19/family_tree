@@ -26,47 +26,47 @@ const bfs = (id, tree, node) => {
   }
 };
 
-const convertToTree = (data) => {
-  const map = new Map(data.map(item => [item.id, { ...item, children: [] }]));
-
-  let root = null;
-
-  data.forEach(item => {
-    if (!item.fatherId && !item.motherId && item.isAncestor) {
-      root = map.get(item.id);
-    } else {
-      const parent = map.get(item.fatherId) || map.get(item.motherId);
-      if (parent) {
-        parent.children.push(map.get(item.id));
-      }
-    }
-  });
-
-  return root;
-};
-
 // const convertToTree = (data) => {
 //   const map = new Map(data.map(item => [item.id, { ...item, children: [] }]));
+
 //   let root = null;
 
 //   data.forEach(item => {
-//     console.log(item);
 //     if (!item.fatherId && !item.motherId && item.isAncestor) {
 //       root = map.get(item.id);
 //     } else {
-//       const father = map.get(item.fatherId);
-//       const mother = map.get(item.motherId);
-//       if (father) {
-//         father.children.push(map.get(item.id));
-//       }
-//       if (mother) {
-//         mother.children.push(map.get(item.id));
+//       const parent = map.get(item.fatherId) || map.get(item.motherId);
+//       if (parent) {
+//         parent.children.push(map.get(item.id));
 //       }
 //     }
 //   });
 
 //   return root;
 // };
+
+const convertToTree = (data) => {
+  const map = new Map(data.map(item => [item.id, { ...item, children: [] }]));
+  let root = null;
+
+  data.forEach(item => {
+    console.log(item);
+    if (!item.fatherId && !item.motherId && item.isAncestor) {
+      root = map.get(item.id);
+    } else {
+      const father = map.get(item.fatherId);
+      const mother = map.get(item.motherId);
+      if (father) {
+        father.children.push(map.get(item.id));
+      }
+      if (mother) {
+        mother.children.push(map.get(item.id));
+      }
+    }
+  });
+
+  return root;
+};
 
 const Home = () => {
   const [tree, setTree] = useState(null);
@@ -137,13 +137,15 @@ const Home = () => {
     setIsAddPartnerModalOpen(false);
   };
 
+  console.log(node);
+
   const handleSubmitAddChild = async (formData) => {
     try {
       await axios.post(`http://localhost:4000/v1/api/family-member/${familyTreeId}/add-child`,
   {
           ...formData,
           familyTreeId,
-          fatherId: node.id 
+          id: node?.id 
         },
 {
           headers: {
