@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { login } from '../../redux/authSlice';
+import axios from "axios";
 import classes from './login.module.css';
 
 // Define validation schema
@@ -28,20 +29,15 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-      const res = await fetch(`http://localhost:4000/v1/api/login`, {
+      const res = await axios.post(`http://localhost:4000/v1/api/login`, data, {
         headers: {
           'Content-Type': 'application/json',
         },
-        method: 'POST',
-        body: JSON.stringify(data),
       });
-
       if (res.status === 404) {
         throw new Error('Sai tên người dùng hoặc mật khẩu');
       }
-
-      const responseData = await res.json();
-      dispatch(login(responseData));
+      dispatch(login(res.data));
       navigate('/home');
     } catch (error) {
       setError(true);

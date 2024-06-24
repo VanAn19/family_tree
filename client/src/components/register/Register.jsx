@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import classes from './register.module.css';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { register } from '../../redux/authSlice';
-import * as yup from 'yup';
+import axios from 'axios';
 
 const emailRegExp = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
@@ -12,52 +15,43 @@ const schema = yup.object().shape({
   name: yup.string().required('Họ tên là bắt buộc'),
   email: yup.string().matches(emailRegExp, 'Email không hợp lệ').required('Email là bắt buộc'),
   password: yup.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự').required('Mật khẩu là bắt buộc'),
-  confirmPass: yup.string()
-    .oneOf([yup.ref('password'), null], 'Mật khẩu xác nhận phải trùng khớp')
-    .required('Xác nhận mật khẩu là bắt buộc'),
+  confirmPass: yup.string().oneOf([yup.ref('password'), null], 'Mật khẩu xác nhận phải trùng khớp').required('Xác nhận mật khẩu là bắt buộc'),
 });
 
 const Register = () => {
-  const [username, setUsername] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPass, setConfirmPass] = useState('');
+  const { 
+    register: formRegister, 
+    handleSubmit, 
+    formState: { errors } 
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
+    const { username, name, email, password } = data;
+    const { confirmPass } = data;
 
     try {
-      await schema.validate({
-        username,
-        name,
-        email,
-        password,
-        confirmPass,
-      }, { abortEarly: false });
-
       if (confirmPass !== password) {
         throw new Error('Mật khẩu xác nhận không trùng khớp');
       }
-
-      const res = await fetch('http://localhost:4000/v1/api/signup', {
+      setIsLoading(true);
+      const res = await axios.post('http://localhost:4000/v1/api/signup', {
+        name,
+        email,
+        username,
+        password
+      }, {
         headers: {
           'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify({ name, email, username, password })
+        }
       });
-
-      if (res.status === 500) {
-        throw new Error('Wrong credentials');
-      }
-
-      const data = await res.json();
-      dispatch(register(data));
+      dispatch(register(res.data));
       navigate('/home');
     } catch (error) {
       setError(true);
@@ -65,6 +59,8 @@ const Register = () => {
         setError(false);
       }, 2500);
       console.error(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -72,48 +68,53 @@ const Register = () => {
     <div className={classes.container}>
       <div className={classes.wrapper}>
         <h2 className={classes.title}>Phần mềm gia phả</h2>
-        <form onSubmit={handleRegister}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <label htmlFor="username">
             <input
-              onChange={(e) => setUsername(e.target.value)}
+              {...formRegister('username')}
               type="text"
               id="username"
               placeholder="Enter username"
             />
           </label>
+          {errors.username && <p className={classes.error}>{errors.username.message}</p>}
           <label htmlFor="name">
             <input
-              onChange={(e) => setName(e.target.value)}
+              {...formRegister('name')}
               type="text"
               id="name"
               placeholder="Enter name"
             />
           </label>
+          {errors.name && <p className={classes.error}>{errors.name.message}</p>}
           <label htmlFor="email">
             <input
-              onChange={(e) => setEmail(e.target.value)}
+              {...formRegister('email')}
               type="email"
               id="email"
               placeholder="Enter email"
             />
           </label>
+          {errors.email && <p className={classes.error}>{errors.email.message}</p>}
           <label htmlFor="password">
             <input
-              onChange={(e) => setPassword(e.target.value)}
+              {...formRegister('password')}
               type="password"
               id="password"
               placeholder="Enter password"
             />
           </label>
+          {errors.password && <p className={classes.error}>{errors.password.message}</p>}
           <label htmlFor="confirmPass">
             <input
-              onChange={(e) => setConfirmPass(e.target.value)}
+              {...formRegister('confirmPass')}
               type="password"
               id="confirmPass"
               placeholder="Confirm password"
             />
           </label>
-          <button className={classes.submitBtn}>Đăng ký</button>
+          {errors.confirmPass && <p className={classes.error}>{errors.confirmPass.message}</p>}
+          <button className={classes.submitBtn} disabled={isLoading}>Đăng ký</button>
           <Link to="/login">
             Đã có tài khoản? <p className={classes.login}>Đăng nhập</p>
           </Link>
