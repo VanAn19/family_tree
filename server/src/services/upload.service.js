@@ -1,6 +1,7 @@
 'use strict'
 
 const cloudinary = require('../configs/cloudinary.config');
+const { getAvatarById } = require('../repositories/familyMember.repo');
 
 // 1. upload from url image
 const uploadImageFromUrl = async () => {
@@ -18,22 +19,41 @@ const uploadImageFromUrl = async () => {
 }
 
 // 2. upload from image local
-const uploadImageFromLocal = async ({ path, folderName = 'user/1' }) => {
+// const uploadImageFromLocal = async ({ path, folderName = 'user/1' }) => {
+//     try {
+//         const result = await cloudinary.uploader.upload(path, {
+//             public_id: 'thumb',
+//             folder: folderName
+//         });
+//         return {
+//             image_url: result.secure_url,
+//             userId: 1
+//         }
+//     } catch (error) {
+//         console.error('Error uploading image:', error);
+//     }
+// }
+const uploadImageFromLocal = async ({ path, id }) => {
     try {
         const result = await cloudinary.uploader.upload(path, {
             public_id: 'thumb',
-            folder: folderName
+            folder: `user/${id}`
         });
         return {
             image_url: result.secure_url,
-            userId: 1
+            userId: id
         }
     } catch (error) {
         console.error('Error uploading image:', error);
     }
 }
 
+const getAvatar = async ({ familyTreeId }) => {
+    return await getAvatarById({ familyTreeId });
+}
+
 module.exports = {
     uploadImageFromUrl,
-    uploadImageFromLocal
+    uploadImageFromLocal,
+    getAvatar
 }

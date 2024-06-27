@@ -1,18 +1,50 @@
 'use strict'
 
+// const multer = require('multer');
+
+// const uploadDisk = multer({
+//     storage: multer.diskStorage({
+//         destination: function (req, file, cb) {
+//             cb(null, './src/uploads');
+//         },
+//         filename: function (req, file, cb) {
+//             cb(null, `${Date.now()}-${file.originalname}`);
+//         }
+//     })
+// });
+
+// module.exports = {
+//     uploadDisk
+// }
+
+const path = require('path');
 const multer = require('multer');
 
-const uploadDisk = multer({
-    storage: multer.diskStorage({
-        destination: function (req, file, cb) {
-            cb(null, './src/uploads');
-        },
-        filename: function (req, file, cb) {
-            cb(null, `${Date.now()}-${file.originalname}`);
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) { 
+        cb(null, './src/uploads/');
+    },
+    filename: function (req, file, cb) {
+        let ext = path.extname(file.originalname);
+        cb(null, Date.now() + ext);
+    }
+});
+
+var upload = multer({
+    storage: storage,
+    fileFilter: function (req, file, callback) {
+        if (file.mimetype == "image/png" || file.mimetype == "image/jpeg") {
+            callback(null, true);
+        } else {
+            console.log("Only jpg & png supported");
+            callback(null, false);
         }
-    })
+    },
+    limits: {
+        fileSize: 1024 * 1024 * 2
+    }
 });
 
 module.exports = {
-    uploadDisk
-}
+    upload
+};

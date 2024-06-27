@@ -9,7 +9,7 @@ import {
   ModalOverlay,
 } from "@chakra-ui/modal";
 import { FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -18,7 +18,7 @@ import classes from "./NodeModal.module.css";
 const schema = yup.object().shape({
   name: yup.string()
     .required('Họ tên là bắt buộc')
-    .max(50, 'Họ tên không được vượt quá 100 ký tự'),
+    .max(50, 'Họ tên không được vượt quá 50 ký tự'),
   dateOfBirth: yup.date().required('Ngày sinh là bắt buộc'),
   gender: yup.string().required('Giới tính là bắt buộc'),
   isAlive: yup.string().required('Tình trạng là bắt buộc'),
@@ -49,6 +49,8 @@ const schema = yup.object().shape({
 });
 
 const NodeModalAddPartner = ({ isOpen, onClose, onSubmit }) => {
+  const [isAlive, setIsAlive] = useState('true');
+
   const {
     register,
     handleSubmit,
@@ -61,6 +63,10 @@ const NodeModalAddPartner = ({ isOpen, onClose, onSubmit }) => {
   const handleFormSubmit = (data) => {
     onSubmit(data);
     reset();
+  };
+
+  const handleIsAliveChange = (e) => {
+    setIsAlive(e.target.value);
   };
 
   return (
@@ -113,21 +119,27 @@ const NodeModalAddPartner = ({ isOpen, onClose, onSubmit }) => {
                 placeholder=" "
                 name="isAlive"
                 {...register('isAlive')}
+                onChange={handleIsAliveChange}
               >
                 <option value="true">Còn sống</option>
                 <option value="false">Đã mất</option>
               </Select>
               {errors.isAlive && <p className={classes.error}>{errors.isAlive.message}</p>}
             </FormControl>
-            <FormControl>
-              <FormLabel>Ngày mất</FormLabel>
-              <Input
-                type="date"
-                name="deathOfBirth"
-                {...register('deathOfBirth')}
-              />
-              {errors.deathOfBirth && <p className={classes.error}>{errors.deathOfBirth.message}</p>}
-            </FormControl>
+            {isAlive === 'false' ? (
+              <FormControl>
+                <FormLabel>Ngày mất</FormLabel>
+                <Input
+                  type="date"
+                  name="deathOfBirth"
+                  {...register('deathOfBirth')}
+                  disabled={isAlive === 'true'}
+                />
+                {errors.deathOfBirth && <p className={classes.error}>{errors.deathOfBirth.message}</p>}
+              </FormControl>
+            ) : (
+              <div></div>
+            )}
             <ModalFooter>
               <Button
                 color="blue.500"

@@ -18,7 +18,7 @@ import classes from "./NodeModal.module.css"
 const schema = yup.object().shape({
   name: yup.string()
     .required('Họ tên người dùng là bắt buộc')
-    .max(50, 'Họ tên không được vượt quá 100 ký tự'),
+    .max(50, 'Họ tên không được vượt quá 50 ký tự'),
   dateOfBirth: yup.date().required('Ngày sinh là bắt buộc'),
   gender: yup.string().required('Giới tính là bắt buộc'),
   isAlive: yup.string().required('Tình trạng là bắt buộc'),
@@ -61,7 +61,21 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
   });
 
   const handleFormSubmit = (data) => {
-    onSubmit(data);
+    // const formData = new FormData();
+    // Object.keys(data).forEach(key => {
+    //   formData.append(key, data[key]);
+    // });
+
+    // console.log(data.avatar);
+
+    // if (data.avatar && data.avatar[0]) {
+    //   formData.append('avatar', data.avatar[0]);
+    // }
+    const formData = {
+      ...data,
+      avatar: data.avatar[0] || null, 
+    };
+    onSubmit(formData);
     reset();
   };
 
@@ -77,6 +91,15 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
         <ModalCloseButton />
         <ModalBody>
           <form onSubmit={handleSubmit(handleFormSubmit)}>
+            <FormControl>
+              <FormLabel>Ảnh</FormLabel>
+              <Input
+                sx={{border: 'none'}}
+                type="file"
+                name="avatar"
+                {...register('avatar')}
+              />
+            </FormControl>
             <FormControl isInvalid={errors.name}>
               <FormLabel>Họ tên</FormLabel>
               <Input
@@ -126,16 +149,6 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
               </Select>
               {errors.isAlive && <p className={classes.error}>{errors.isAlive.message}</p>}
             </FormControl>
-            {/* <FormControl>
-              <FormLabel>Ngày mất</FormLabel>
-              <Input
-                type="date"
-                name="deathOfBirth"
-                {...register('deathOfBirth')}
-                disabled={isAlive === 'true'}
-              />
-              {errors.deathOfBirth && <p className={classes.error}>{errors.deathOfBirth.message}</p>}
-            </FormControl> */}
             {isAlive === 'false' ? (
               <FormControl>
                 <FormLabel>Ngày mất</FormLabel>

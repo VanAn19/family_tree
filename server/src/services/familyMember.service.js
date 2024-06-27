@@ -94,11 +94,15 @@ class FamilyMemberService {
         return await memberDelete.destroy();
     }
 
-    static addChild = async (payload) => {
+    static addChild = async (payload, file) => {
         const {
             familyTreeId, id, childrenId, name, citizenIdentification,
             dateOfBirth, gender, avatar, job, isAlive, deathOfBirth
         } = payload
+        let avatarUrl = null;
+        if (file) {
+            avatarUrl = file.path;
+        }
         const foundMember = await FamilyMember.findOne({ where: {id} });
         const foundPartnerMember = await FamilyMember.findOne({ where: {id: foundMember.partnerId}});
         let newChild;
@@ -112,7 +116,7 @@ class FamilyMemberService {
                 citizenIdentification,
                 dateOfBirth,
                 gender,
-                avatar,
+                avatar: avatarUrl,
                 job,
                 isAlive,
                 deathOfBirth
@@ -128,7 +132,7 @@ class FamilyMemberService {
                 citizenIdentification,
                 dateOfBirth,
                 gender,
-                avatar,
+                avatar: avatarUrl,
                 job,
                 isAlive,
                 deathOfBirth

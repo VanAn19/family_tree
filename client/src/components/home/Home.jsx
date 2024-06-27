@@ -10,7 +10,9 @@ import NavBar from "../navbar/NavBar";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { useDisclosure } from "@chakra-ui/react"; 
-import image from "../../assets/node.jpg"
+// import image from "../../assets/node.jpg"
+import classes from "./home.module.css"
+import images from "../../assets";
 
 const Tree = lazy(() => import("react-d3-tree"));
 
@@ -50,7 +52,7 @@ const convertToTree = (data) => {
   let root = null;
 
   data.forEach(item => {
-    console.log(item);
+    // console.log(item);
     if (!item.fatherId && !item.motherId && item.isAncestor) {
       root = map.get(item.id);
     } else {
@@ -71,6 +73,7 @@ const convertToTree = (data) => {
 const Home = () => {
   const [tree, setTree] = useState(null);
   const [node, setNode] = useState(null);
+  const [avatars, setAvatars] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const [isAddPartnerModalOpen, setIsAddPartnerModalOpen] = useState(false);
@@ -95,9 +98,19 @@ const Home = () => {
     }
   };
 
+  const fetchAvatar = async (familyTreeId) => {
+    try {
+      const response = await axios.get(`http://localhost:4000/v1/api/upload/get-avatar/${familyTreeId}`, {});
+      setAvatars(response.data.metadata);
+    } catch (error) {
+      console.error("Error fetching avatar:", error);
+    }
+  };
+
   useEffect(() => {
     if (familyTreeId) {
       fetchFamilyTree(familyTreeId);
+      fetchAvatar(familyTreeId);
     }
   }, [familyTreeId]);
 
@@ -115,7 +128,7 @@ const Home = () => {
           familyTreeId,
           partnerId: node.id 
         },
-{
+      {
           headers: {
             "x-client-id": `${user.id}`,
             "Authorization": `${token}`
@@ -137,20 +150,27 @@ const Home = () => {
     setIsAddPartnerModalOpen(false);
   };
 
-  console.log(node);
-
   const handleSubmitAddChild = async (formData) => {
+    // console.log(formData);
     try {
+      // const data = new FormData();
+      // for (const [key, value] of Object.entries(formData)) {
+      //   data.append(key, value);
+      // }
       await axios.post(`http://localhost:4000/v1/api/family-member/${familyTreeId}/add-child`,
   {
           ...formData,
           familyTreeId,
-          id: node?.id 
+          id: node.id 
+          // ...data,
+          // familyTreeId,
+          // id: node.id 
         },
 {
           headers: {
             "x-client-id": `${user.id}`,
-            "Authorization": `${token}`
+            "Authorization": `${token}`,
+            "Content-Type": "multipart/form-data"
           }
         }
       );
@@ -219,14 +239,34 @@ const Home = () => {
 
   const renderRectSvgNode = ({ nodeDatum }, click) => (
     <g onClick={(event) => click(nodeDatum, event)}>
-      <image href={image} width="200" height="100" x="-100" y="-70" />
+      <image href={images.node1} width="250" height="150" x="-125" y="-140" />
       <text fill="black" x="0" y="-15" fontSize="12" textAnchor="middle">{`${nodeDatum.name}`}</text>
-      {/* <text fill="black" x="-95" y="15" fontSize="12">{`Gender: ${nodeDatum.gender}`}</text> */}
-      {nodeDatum.attributes && (
+      {/* <text fill="black" x="-95" y="15" fontSize="12">{`Gender: ${nodeDatum.gender}`}</text>
+      {nodeDatum && (
         <>
           <text fill="black" x="-95" y="30" fontSize="12">{`ID: ${nodeDatum.attributes.id}`}</text>
         </>
-      )}
+      )} */}
+      {avatars.map((data) => {
+        if (data.id === nodeDatum.id) {
+          if (data.avatar) {
+            return (
+              <image key={data.id} href={`http://localhost:4000/${data.avatar}`} alt="" width="250" height="100" x="-125" y="-140" />
+            )
+          } else {
+            if (data.gender === "Nam") {
+              return (
+                <image key={data.id} href={images.defaultMaleAvatar} alt="" width="250" height="100" x="-125" y="-140" />
+              )
+            }
+            if (data.gender === "Nữ") {
+              return (
+                <image key={data.id} href={images.defaultFemaleAvatar} alt="" width="250" height="100" x="-125" y="-140" />
+              )
+            }
+          }
+        }
+      })}
     </g>
   );
 
@@ -243,7 +283,7 @@ const Home = () => {
               onNodeClick={handleNodeClick}
               translate={{ x: 200, y: 200 }}
               separation={{ siblings: 2, nonSiblings: 2 }}
-              nodeSize = {{ x: 200, y: 200 }}
+              nodeSize = {{ x: 100, y: 450 }}
               renderCustomNodeElement={(nodeInfo) =>
                 renderRectSvgNode(nodeInfo, handleNodeClick)
               }
@@ -251,7 +291,7 @@ const Home = () => {
           </Suspense>
         ) : (
           // <div>Please select a family tree.</div>
-          <h1 style={{textAlign: "center", color: "#fff", marginTop: "100px"}}>Chọn cây của bạn, nếu chưa có hãy tạo mới.</h1>
+          <h1 style={{textAlign: "center", color: "#000", marginTop: "100px"}}>Chọn cây của bạn, nếu chưa có hãy tạo mới.</h1>
         )}
         {isOpen && (
           <NodeContextMenu

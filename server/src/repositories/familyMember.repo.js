@@ -11,6 +11,14 @@ const findAllMemberByFamilyTreeId = async ({ familyTreeId }) => {
     return members
 }
 
+const getAvatarById = async ({ familyTreeId }) => {
+    const members = await sequelize.query("SELECT id, gender, avatar FROM familymembers WHERE familyTreeId = :familyTreeId", {
+        type: sequelize.QueryTypes.SELECT,
+        replacements: { familyTreeId }
+    });
+    return members
+}
+
 const deleteDescendants = async ({ member, level = 0 }) => {
     if (!member || level > 1) {
         return; 
@@ -36,5 +44,6 @@ const deleteDescendants = async ({ member, level = 0 }) => {
     
 module.exports = { 
     findAllMemberByFamilyTreeId,
+    getAvatarById,
     deleteDescendants
 };

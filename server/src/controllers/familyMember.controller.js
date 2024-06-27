@@ -44,7 +44,7 @@ class FamilyTreeController {
             metadata: await FamilyMemberService.addChild({
                 ...req.body,
                 familyTreeId: req.params.familyTreeId
-            })
+            }, req.file)
         }).send(res)
     }
 
@@ -54,7 +54,7 @@ class FamilyTreeController {
             metadata: await FamilyMemberService.getFamilyMember({
                 familyTreeId: req.params.familyTreeId
             })
-        }).send(res)
+        }).send(res);
     }
 
     getMemberById = async (req,res,next) => {

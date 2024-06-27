@@ -38,7 +38,7 @@ const NodeModalViewDetails = ({ isOpen, onClose, node }) => {
     if (node?.partnerId) {
       fetchPartner(node.partnerId, familyTreeId);
     }
-  }, []);
+  }, [node]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
