@@ -10,7 +10,7 @@ const router = express.Router();
 router.use(authentication)
 
 router.post('/:familyTreeId/add-partner', asyncHandler(familyMemberController.addPartner));
-router.patch('/:familyTreeId/update-member/:id', asyncHandler(familyMemberController.updateMember));
+router.patch('/:familyTreeId/update-member/:id', upload.single('avatar'), asyncHandler(familyMemberController.updateMember));
 router.delete('/:familyTreeId/delete-member/:id', asyncHandler(familyMemberController.deleteMember));
 router.post('/:familyTreeId/add-child', upload.single('avatar'), asyncHandler(familyMemberController.addChild));
 router.get('/:familyTreeId', asyncHandler(familyMemberController.getFamilyMember));

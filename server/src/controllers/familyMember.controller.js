@@ -24,7 +24,7 @@ class FamilyTreeController {
                     ...req.body,
                     familyTreeId: req.params.familyTreeId
                 }
-            })
+            }, req.file)
         }).send(res)
     }
 

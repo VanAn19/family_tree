@@ -2,6 +2,7 @@
 
 const { sequelize } = require('../models');
 const { FamilyMember } = require('../models');
+const { Op } = require('sequelize');
 
 const findAllMemberByFamilyTreeId = async ({ familyTreeId }) => {
     const members = await sequelize.query("SELECT * FROM familymembers WHERE familyTreeId = :familyTreeId", {
@@ -19,12 +20,8 @@ const getAvatarById = async ({ familyTreeId }) => {
     return members
 }
 
-const deleteDescendants = async ({ member, level = 0 }) => {
-    if (!member || level > 1) {
-        return; 
-    }
-    console.log("member.childrenId::::::", member.childrenId);
-    const childrenIds = member.childrenId || [];
+const deleteDescendants = async (member) => {
+    const childrenIds = member.childrenId ? JSON.parse(member.childrenId) : [];
     if (childrenIds.length > 0) {
         const childrenMembers = await FamilyMember.findAll({
             where: {
@@ -36,8 +33,8 @@ const deleteDescendants = async ({ member, level = 0 }) => {
         });
 
         for (const child of childrenMembers) {
+            await deleteDescendants(child); 
             await child.destroy();
-            await deleteDescendants(child, level + 1); 
         }
     }
 }

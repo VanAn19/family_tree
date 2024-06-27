@@ -1,6 +1,6 @@
 import React, { useState, lazy, Suspense, useEffect } from "react";
 import axios from "axios";
-import { Box, Stack } from "@chakra-ui/layout";
+import { Box, Stack, Text, Square } from "@chakra-ui/layout";
 import NodeModalViewDetails from "../NodeModal/NodeModalViewDetails";
 import NodeModalAddPartner from "../NodeModal/NodeModalAddPartner";
 import NodeModalAddChild from "../NodeModal/NodeModalAddChild";
@@ -175,6 +175,7 @@ const Home = () => {
         }
       );
       fetchFamilyTree(familyTreeId);
+      fetchAvatar(familyTreeId);
       closeAddChildModal();
     } catch (error) {
       console.error("Error adding child:", error);
@@ -197,15 +198,20 @@ const Home = () => {
   const handleEditInfo = async (formData) => {
     try {
       await axios.patch(`http://localhost:4000/v1/api/family-member/${familyTreeId}/update-member/${node.id}`,
-        formData,
+        {
+          ...formData,
+          familyTreeId
+        },
         {
           headers: {
             "x-client-id": `${user.id}`,
-            "Authorization": `${token}`
+            "Authorization": `${token}`,
+            "Content-Type": "multipart/form-data"
           }
         }
       );
       fetchFamilyTree(familyTreeId);
+      fetchAvatar(familyTreeId);
       closeEditInfoModal();
     } catch (error) {
       console.error("Error updating info:", error);
@@ -237,38 +243,65 @@ const Home = () => {
     }
   };
 
+  function truncateText(text, maxLength) {
+    if (text.length <= maxLength) {
+      return text;
+    }
+    return text.substring(0, maxLength) + '...';
+  }
+  
+
   const renderRectSvgNode = ({ nodeDatum }, click) => (
     <g onClick={(event) => click(nodeDatum, event)}>
-      <image href={images.node1} width="250" height="150" x="-125" y="-140" />
-      <text fill="black" x="0" y="-15" fontSize="12" textAnchor="middle">{`${nodeDatum.name}`}</text>
-      {/* <text fill="black" x="-95" y="15" fontSize="12">{`Gender: ${nodeDatum.gender}`}</text>
-      {nodeDatum && (
-        <>
-          <text fill="black" x="-95" y="30" fontSize="12">{`ID: ${nodeDatum.attributes.id}`}</text>
-        </>
-      )} */}
+      {nodeDatum.gender === "Nam" && (
+        <image href={images.nodeMale} width="250" height="150" x="-125" y="-125" />
+      )}
+      {nodeDatum.gender === "Nữ" && (
+        <image href={images.nodeFemale} width="250" height="150" x="-125" y="-125" />
+      )}
+      {/* <text fill="black" x="0" y="0" fontSize="12" textAnchor="middle" fontFamily="Roboto" fontWeight="lighter">{truncateText(nodeDatum.name, 15)}</text> */}
+      <foreignObject x="-125" y="-10" width="250" height="30">
+        <div
+          xmlns="http://www.w3.org/1999/xhtml"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+            fontSize: "12px",
+            color: "black",
+            textAlign: "center"
+          }}
+        >
+          {truncateText(nodeDatum.name, 15)}
+        </div>
+      </foreignObject>
       {avatars.map((data) => {
         if (data.id === nodeDatum.id) {
           if (data.avatar) {
             return (
-              <image key={data.id} href={`http://localhost:4000/${data.avatar}`} alt="" width="250" height="100" x="-125" y="-140" />
+              <image key={data.id} href={`http://localhost:4000/${data.avatar}`} alt="" width="250" height="100" x="-125" y="-125" />
             )
           } else {
             if (data.gender === "Nam") {
               return (
-                <image key={data.id} href={images.defaultMaleAvatar} alt="" width="250" height="100" x="-125" y="-140" />
+                <image key={data.id} href={images.defaultMaleAvatar} alt="" width="250" height="100" x="-125" y="-125" />
               )
             }
             if (data.gender === "Nữ") {
               return (
-                <image key={data.id} href={images.defaultFemaleAvatar} alt="" width="250" height="100" x="-125" y="-140" />
+                <image key={data.id} href={images.defaultFemaleAvatar} alt="" width="250" height="100" x="-125" y="-125" />
               )
             }
           }
         }
       })}
     </g>
-  );
+    );
 
   return (
     <Stack direction="row" spacing="md" bg="#e8c77b">

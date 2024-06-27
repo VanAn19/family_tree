@@ -8,7 +8,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/modal";
-import { FormControl, FormLabel, Input, Select } from "@chakra-ui/react";
+import { FormControl, FormLabel, Input, Select, Image } from "@chakra-ui/react";
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -59,6 +59,7 @@ const NodeModalEditInfo = ({ isOpen, onClose, onSubmit, initialData }) => {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
+      avatar: "",
       name: "",
       citizenIdentification: "",
       dateOfBirth: "",
@@ -83,7 +84,11 @@ const NodeModalEditInfo = ({ isOpen, onClose, onSubmit, initialData }) => {
   const isAlive = watch('isAlive');
 
   const handleFormSubmit = (data) => {
-    onSubmit(data);
+    const formData = {
+      ...data,
+      avatar: data.avatar[0], 
+    };
+    onSubmit(formData);
     reset();
   };
 
@@ -100,6 +105,18 @@ const NodeModalEditInfo = ({ isOpen, onClose, onSubmit, initialData }) => {
         <ModalCloseButton />
         <ModalBody>
           <form onSubmit={handleSubmit(handleFormSubmit)}>
+            <FormControl>
+              <FormLabel>Ảnh</FormLabel>
+              {initialData?.avatar && (
+                <Image src={`http://localhost:4000/${initialData.avatar}`} alt="" boxSize="100px" objectFit="cover" marginLeft="17px" />
+              )}
+              <Input
+                sx={{border: 'none', marginTop: '5px'}}
+                type="file"
+                name="avatar" 
+                {...register('avatar')}
+              />
+            </FormControl>
             <FormControl isInvalid={errors.name}>
               <FormLabel>Họ tên</FormLabel>
               <Input

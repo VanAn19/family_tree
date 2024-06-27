@@ -17,6 +17,8 @@ class FamilyMemberService {
         const members = await findAllMemberByFamilyTreeId({familyTreeId: familyTreeId});
         const ids = members.map(member => member.id);
         if (!ids.includes(partnerId)) throw new NotFoundError('Not found partner');
+        const foundPartner = await FamilyMember.findOne({ where: {id: partnerId}});
+        if (foundPartner.partnerId) throw new BadRequestError('Partner exists');
         // const existingPartner = await FamilyMember.findOne({ where: {partnerId: member.id} });
         // if (existingPartner) throw new BadRequestError('Partner has exists');
         const newPartner = await FamilyMember.create({
@@ -32,25 +34,31 @@ class FamilyMemberService {
             isAlive,
             deathOfBirth
         });
-        const updatePartner = await FamilyMember.findOne({ where: {id: partnerId} });
-        await updatePartner.update({partnerId: newPartner.id})
+        // const updatePartner = await FamilyMember.findOne({ where: {id: partnerId} });
+        await foundPartner.update({partnerId: newPartner.id})
         return newPartner
     }
 
-    static updateMember = async ({ id, payload }) => {
+    static updateMember = async ({ id, payload }, file) => {
         const {
             familyTreeId, name, citizenIdentification,
             dateOfBirth, gender, avatar, job, isAlive, deathOfBirth
         } = payload
+        let avatarUrl = null;
         const foundPartner = await FamilyMember.findOne({ where: {id} });
         if (!foundPartner) throw new NotFoundError('Partner doesnt found');
+        if (file) {
+            avatarUrl = file.path;
+        } else {
+            avatarUrl = foundPartner.avatar;
+        }
         return await foundPartner.update({
             familyTreeId,
             name,
             citizenIdentification,
             dateOfBirth,
             gender,
-            avatar,
+            avatar: avatarUrl,
             job,
             isAlive,
             deathOfBirth
@@ -60,7 +68,7 @@ class FamilyMemberService {
     static deleteMember = async ({ id, familyTreeId }) => {
         /*
             1: Tìm thành viên cần xóa
-            2: Xóa partner 
+            2: Xóa vợ/chồng 
             3: Tìm và xóa các thành viên con
             4: Xóa từng thành viên con (nếu có)
             5: Xóa thành viên cần xóa
@@ -68,7 +76,6 @@ class FamilyMemberService {
         // 1
         const memberDelete = await FamilyMember.findOne({ where: { id, familyTreeId } });
         if (!memberDelete) throw new NotFoundError('Member not found');
-
         // 2
         if (memberDelete.partnerId) {
             const partnerDelete = await FamilyMember.findOne({ where: { id: memberDelete.partnerId, familyTreeId } });
@@ -76,20 +83,6 @@ class FamilyMemberService {
                 await partnerDelete.destroy();
             }
         }
-
-        // const childrenIds = JSON.parse(memberDelete.childrenId) || [];
-        // let childrenMembers = [];
-        // if (childrenIds.length > 0) {
-        //     childrenMembers = await FamilyMember.findAll({
-        //         where: {
-        //             id: {
-        //                 [Op.in]: childrenIds 
-        //             },
-        //             familyTreeId 
-        //         }
-        //     });
-        // }
-
         await deleteDescendants(memberDelete);
         return await memberDelete.destroy();
     }
