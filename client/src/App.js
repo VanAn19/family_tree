@@ -5,7 +5,6 @@ import Intro from './components/intro/Intro'
 import Login from './components/login/Login'
 import Register from './components/register/Register'
 import Home from './components/home/Home'
-import NavBar from './components/navbar/NavBar';
 
 function App() {
   const { user } = useSelector((state) => state.auth)

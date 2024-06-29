@@ -1,6 +1,6 @@
 import React, { useState, lazy, Suspense, useEffect } from "react";
 import axios from "axios";
-import { Box, Stack, Text, Square } from "@chakra-ui/layout";
+import { Box, Stack } from "@chakra-ui/layout";
 import NodeModalViewDetails from "../NodeModal/NodeModalViewDetails";
 import NodeModalAddPartner from "../NodeModal/NodeModalAddPartner";
 import NodeModalAddChild from "../NodeModal/NodeModalAddChild";
@@ -30,39 +30,71 @@ const bfs = (id, tree, node) => {
 
 // const convertToTree = (data) => {
 //   const map = new Map(data.map(item => [item.id, { ...item, children: [] }]));
-
 //   let root = null;
 
 //   data.forEach(item => {
 //     if (!item.fatherId && !item.motherId && item.isAncestor) {
 //       root = map.get(item.id);
 //     } else {
-//       const parent = map.get(item.fatherId) || map.get(item.motherId);
-//       if (parent) {
-//         parent.children.push(map.get(item.id));
+//       const father = map.get(item.fatherId);
+//       const mother = map.get(item.motherId);
+//       if (father && !father.children.includes(map.get(item.id))) {
+//         father.children.push(map.get(item.id));
+//       }
+//       if (mother && !mother.children.includes(map.get(item.id))) {
+//         mother.children.push(map.get(item.id));
+//       }
+//     }
+//     if (item.partnerId) {
+//       const partner = map.get(item.partnerId);
+//       if (partner) {
+//         map.get(item.id).partner = partner;
 //       }
 //     }
 //   });
-
 //   return root;
 // };
 
 const convertToTree = (data) => {
   const map = new Map(data.map(item => [item.id, { ...item, children: [] }]));
   let root = null;
-
   data.forEach(item => {
-    // console.log(item);
+    // if (!item.fatherId && !item.motherId && item.isAncestor) {
+    //   root = map.get(item.id);
+    // } else {
+    //   const father = map.get(item.fatherId);
+    //   const mother = map.get(item.motherId);
+    //   if (father) {
+    //     father.children.push(map.get(item.id));
+    //   }
+    //   if (mother) {
+    //     mother.children.push(map.get(item.id));
+    //   }
+    // }
+    // if (item.partnerId) {
+    //   const partner = map.get(item.partnerId);
+    //   if (partner) {
+    //     map.get(item.id).partner = partner;
+    //   }
+    // }
     if (!item.fatherId && !item.motherId && item.isAncestor) {
       root = map.get(item.id);
     } else {
       const father = map.get(item.fatherId);
       const mother = map.get(item.motherId);
-      if (father) {
+      if (father && !father.children.includes(map.get(item.id))) {
         father.children.push(map.get(item.id));
       }
-      if (mother) {
+      if (mother && !mother.children.includes(map.get(item.id))) {
         mother.children.push(map.get(item.id));
+      }
+    }
+    if (item.partnerId) {
+      const partner = map.get(item.partnerId);
+      if (partner) {
+        const node = map.get(item.id);
+        node.partner = { ...partner, partner: null }; 
+        map.set(item.id, node);
       }
     }
   });
@@ -151,20 +183,12 @@ const Home = () => {
   };
 
   const handleSubmitAddChild = async (formData) => {
-    // console.log(formData);
     try {
-      // const data = new FormData();
-      // for (const [key, value] of Object.entries(formData)) {
-      //   data.append(key, value);
-      // }
       await axios.post(`http://localhost:4000/v1/api/family-member/${familyTreeId}/add-child`,
   {
           ...formData,
           familyTreeId,
           id: node.id 
-          // ...data,
-          // familyTreeId,
-          // id: node.id 
         },
 {
           headers: {
@@ -250,16 +274,24 @@ const Home = () => {
     return text.substring(0, maxLength) + '...';
   }
   
-
   const renderRectSvgNode = ({ nodeDatum }, click) => (
-    <g onClick={(event) => click(nodeDatum, event)}>
+    <g>
+      {nodeDatum.partner && (
+        <line
+          x1="0"
+          y1="0"
+          x2="150"
+          y2="0"
+          stroke="black"
+          strokeWidth="1"
+        />
+      )}
       {nodeDatum.gender === "Nam" && (
         <image href={images.nodeMale} width="250" height="150" x="-125" y="-125" />
       )}
       {nodeDatum.gender === "Nữ" && (
         <image href={images.nodeFemale} width="250" height="150" x="-125" y="-125" />
       )}
-      {/* <text fill="black" x="0" y="0" fontSize="12" textAnchor="middle" fontFamily="Roboto" fontWeight="lighter">{truncateText(nodeDatum.name, 15)}</text> */}
       <foreignObject x="-125" y="-10" width="250" height="30">
         <div
           xmlns="http://www.w3.org/1999/xhtml"
@@ -276,6 +308,7 @@ const Home = () => {
             color: "black",
             textAlign: "center"
           }}
+          onClick={(event) => click(nodeDatum, event)}
         >
           {truncateText(nodeDatum.name, 15)}
         </div>
@@ -287,21 +320,57 @@ const Home = () => {
               <image key={data.id} href={`http://localhost:4000/${data.avatar}`} alt="" width="250" height="100" x="-125" y="-125" />
             )
           } else {
-            if (data.gender === "Nam") {
-              return (
-                <image key={data.id} href={images.defaultMaleAvatar} alt="" width="250" height="100" x="-125" y="-125" />
-              )
-            }
-            if (data.gender === "Nữ") {
-              return (
-                <image key={data.id} href={images.defaultFemaleAvatar} alt="" width="250" height="100" x="-125" y="-125" />
-              )
-            }
+            return (
+              <image key={data.id} href={data.gender === "Nam" ? images.defaultMaleAvatar : images.defaultFemaleAvatar} alt="" width="250" height="100" x="-125" y="-125" />
+            )
           }
         }
       })}
+      {nodeDatum.partner && (
+        <g transform={'translate(150, 0)'} onClick={(event) => click(nodeDatum.partner, event)}>
+          {nodeDatum.partner.gender === "Nam" && (
+            <image href={images.nodeMale} width="250" height="150" x="-125" y="-125" />
+          )}
+          {nodeDatum.partner.gender === "Nữ" && (
+            <image href={images.nodeFemale} width="250" height="150" x="-125" y="-125" />
+            )}
+          <foreignObject x="-125" y="-10" width="250" height="30">
+            <div
+              xmlns="http://www.w3.org/1999/xhtml"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                height: "100%",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+                fontSize: "12px",
+                color: "black",
+                textAlign: "center"
+              }}
+            >
+              {truncateText(nodeDatum.partner.name, 15)}
+            </div>
+          </foreignObject>
+          {avatars.map((data) => {
+            if (data.id === nodeDatum.partner.id) {
+              if (data.avatar) {
+                return (
+                  <image key={data.id} href={`http://localhost:4000/${data.avatar}`} alt="" width="250" height="100" x="-125" y="-125" />
+                )
+              } else {
+                return (
+                  <image key={data.id} href={data.gender === "Nam" ? images.defaultMaleAvatar : images.defaultFemaleAvatar} alt="" width="250" height="100" x="-125" y="-125" />
+                )
+              }
+            }
+          })}
+        </g>
+      )}
     </g>
-    );
+  );
 
   return (
     <Stack direction="row" spacing="md" bg="#e8c77b">
@@ -323,7 +392,6 @@ const Home = () => {
             />
           </Suspense>
         ) : (
-          // <div>Please select a family tree.</div>
           <h1 style={{textAlign: "center", color: "#000", marginTop: "100px"}}>Chọn cây của bạn, nếu chưa có hãy tạo mới.</h1>
         )}
         {isOpen && (
@@ -361,11 +429,6 @@ const Home = () => {
           onSubmit={handleEditInfo}
           initialData={node}
         />
-        {/* <NodeModal
-          isOpen={Boolean(node)}
-          onClose={() => setNode(null)}
-          onSubmit={handleSubmit}
-        /> */}
       </Box>
     </Stack>
   );
