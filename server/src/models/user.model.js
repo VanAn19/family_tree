@@ -2,6 +2,7 @@
 const {
   Model
 } = require('sequelize');
+const crypto = require('crypto');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
@@ -18,12 +19,21 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userCreateId',
       });
     }
+    createPasswordChangedToken() {
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+      this.passwordResetExpires = Date.now() + 15 * 60 * 1000; // Token expires in 15 minutes
+      return resetToken;
+    }
   }
   User.init({
     username: DataTypes.STRING,
     password: DataTypes.STRING,
     name: DataTypes.STRING,
-    email: DataTypes.STRING
+    email: DataTypes.STRING,
+    passwordChangedAt: DataTypes.STRING,
+    passwordResetToken: DataTypes.STRING,
+    passwordResetExpires: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',

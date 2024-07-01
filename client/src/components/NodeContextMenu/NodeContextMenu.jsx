@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
-import { Menu, MenuButton, MenuList, MenuItem, Button, Box } from "@chakra-ui/react";
+import { Menu, MenuList, MenuItem, Box } from "@chakra-ui/react";
 
-const NodeContextMenu = ({ x, y, onAddPartner, onAddChild, onViewDetails, onEdit, onDelete, onClose }) => {
+const NodeContextMenu = ({ x, y, onAddParent, onAddPartner, onAddChild, onViewDetails, onEdit, onDelete, onClose }) => {
   const menuRef = useRef();
 
   const handleBlur = (event) => {
@@ -15,6 +15,7 @@ const NodeContextMenu = ({ x, y, onAddPartner, onAddChild, onViewDetails, onEdit
       <Menu isOpen={true}>
         <MenuList>
           <MenuItem onClick={onViewDetails}>Xem chi tiết</MenuItem>
+          <MenuItem onClick={onAddParent}>Thêm bố/mẹ</MenuItem>
           <MenuItem onClick={onAddPartner}>Thêm vợ/chồng</MenuItem>
           <MenuItem onClick={onAddChild}>Thêm con</MenuItem>
           <MenuItem onClick={onEdit}>Sửa</MenuItem>

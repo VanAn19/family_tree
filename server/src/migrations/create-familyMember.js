@@ -44,6 +44,9 @@ module.exports = {
       avatar: {
         type: Sequelize.STRING
       },
+      relationship: {
+        type: Sequelize.STRING
+      },
       job: {
         type: Sequelize.STRING
       },

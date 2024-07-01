@@ -4,6 +4,8 @@ import { useSelector } from 'react-redux';
 import Intro from './components/intro/Intro'
 import Login from './components/login/Login'
 import Register from './components/register/Register'
+import ForgotPassword from './components/ForgotPassword/ForgotPassword'
+import ResetPassword from './components/ResetPassword/ResetPassword'
 import Home from './components/home/Home'
 
 function App() {
@@ -12,8 +14,10 @@ function App() {
     <div className="App">
       <Routes>
         <Route path='/' element={ !user ? <Intro /> : <Navigate to = '/home' /> }/>
-        <Route path='/login' element={!user ? <Login /> : <Navigate to='/home' />} />
-        <Route path='/register' element={!user ? <Register /> : <Navigate to='/home' />} />
+        <Route path='/login' element={ !user ? <Login /> : <Navigate to='/home' />} />
+        <Route path='/register' element={ !user ? <Register /> : <Navigate to='/home' />} />
+        <Route path='/forgot-password' element={ !user ? <ForgotPassword /> : <Navigate to='/home' />} />
+        <Route path='/reset-password/:token' element={ !user ? <ResetPassword /> : <Navigate to='/home' />} />
         <Route path='/home' element={ user ? <Home /> : <Navigate to='/login' />} />
         <Route path='/home/:familyTreeId' element={ user ? <Home /> : <Navigate to='/login' />} />
      </Routes>

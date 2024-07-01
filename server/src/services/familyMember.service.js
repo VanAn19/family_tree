@@ -9,18 +9,22 @@ const { Sequelize } = require('sequelize');
 
 class FamilyMemberService {
 
-    static addPartner = async (payload) => {
+    static addPartner = async (payload, file) => {
         const {
             familyTreeId, partnerId, childrenId, name, citizenIdentification,
-            dateOfBirth, gender, avatar, job, isAlive, deathOfBirth
+            dateOfBirth, gender, avatar, relationship, job, isAlive, deathOfBirth
         } = payload
         const members = await findAllMemberByFamilyTreeId({familyTreeId: familyTreeId});
-        const ids = members.map(member => member.id);
+        const ids = members.map(member => member.id.toString());
         if (!ids.includes(partnerId)) throw new NotFoundError('Not found partner');
         const foundPartner = await FamilyMember.findOne({ where: {id: partnerId}});
         if (foundPartner.partnerId) throw new BadRequestError('Partner exists');
         // const existingPartner = await FamilyMember.findOne({ where: {partnerId: member.id} });
         // if (existingPartner) throw new BadRequestError('Partner has exists');
+        let avatarUrl = null;
+        if (file) {
+            avatarUrl = file.path;
+        }
         const newPartner = await FamilyMember.create({
             familyTreeId,
             partnerId,
@@ -29,7 +33,8 @@ class FamilyMemberService {
             citizenIdentification,
             dateOfBirth,
             gender,
-            avatar,
+            avatar: avatarUrl,
+            relationship,
             job,
             isAlive,
             deathOfBirth
@@ -42,7 +47,7 @@ class FamilyMemberService {
     static updateMember = async ({ id, payload }, file) => {
         const {
             familyTreeId, name, citizenIdentification,
-            dateOfBirth, gender, avatar, job, isAlive, deathOfBirth
+            dateOfBirth, gender, avatar, relationship, job, isAlive, deathOfBirth
         } = payload
         let avatarUrl = null;
         const foundPartner = await FamilyMember.findOne({ where: {id} });
@@ -59,6 +64,7 @@ class FamilyMemberService {
             dateOfBirth,
             gender,
             avatar: avatarUrl,
+            relationship,
             job,
             isAlive,
             deathOfBirth
@@ -79,9 +85,12 @@ class FamilyMemberService {
         // 2
         if (memberDelete.partnerId) {
             const partnerDelete = await FamilyMember.findOne({ where: { id: memberDelete.partnerId, familyTreeId } });
-            if (partnerDelete) {
-                await partnerDelete.destroy();
+            if (memberDelete.fatherId || memberDelete.motherId) {
+                if (partnerDelete) {
+                    await partnerDelete.destroy();
+                }
             }
+            await partnerDelete.update({ partnerId: null });
         }
         await deleteDescendants(memberDelete);
         return await memberDelete.destroy();
@@ -90,7 +99,7 @@ class FamilyMemberService {
     static addChild = async (payload, file) => {
         const {
             familyTreeId, id, childrenId, name, citizenIdentification,
-            dateOfBirth, gender, avatar, job, isAlive, deathOfBirth
+            dateOfBirth, gender, avatar, relationship, job, isAlive, deathOfBirth
         } = payload
         let avatarUrl = null;
         if (file) {
@@ -110,6 +119,7 @@ class FamilyMemberService {
                 dateOfBirth,
                 gender,
                 avatar: avatarUrl,
+                relationship,
                 job,
                 isAlive,
                 deathOfBirth
@@ -140,6 +150,60 @@ class FamilyMemberService {
             });
         }
         return newChild
+    }
+
+    static addParent = async (payload, file) => {
+        const {
+            familyTreeId, id, childrenId, name, citizenIdentification,
+            dateOfBirth, gender, avatar, job, isAlive, deathOfBirth
+        } = payload
+        let avatarUrl = null;
+        if (file) {
+            avatarUrl = file.path;
+        }
+        const foundMember = await FamilyMember.findOne({ where: {id} });
+        if (foundMember.isAncestor !== true) throw new BadRequestError('Cannot add parent');
+        let existingChildrenIds = [];
+        if (foundMember.childrenId) {
+            // existingChildrenIds = JSON.parse(foundMember.childrenId);
+            try {
+                const parsedChildrenId = JSON.parse(foundMember.childrenId);
+                if (Array.isArray(parsedChildrenId)) {
+                    existingChildrenIds = parsedChildrenId;
+                } else {
+                    throw new Error('childrenId is not an array');
+                }
+            } catch (error) {
+                throw new BadRequestError('Invalid childrenId format');
+            }
+        }
+        existingChildrenIds.push(Number(id));
+        const newParent = await FamilyMember.create({
+            familyTreeId,
+            childrenId: existingChildrenIds,
+            name,
+            citizenIdentification,
+            dateOfBirth,
+            gender,
+            avatar: avatarUrl,
+            job,
+            isAncestor: true,
+            isAlive,
+            deathOfBirth
+        });
+        if (gender === "Nam") {
+            await foundMember.update({
+                fatherId: newParent.id,
+                isAncestor: false
+            });
+        }
+        if (gender === "Nữ") {
+            await foundMember.update({
+                motherId: newParent.id,
+                isAncestor: false
+            });
+        }
+        return newParent
     }
 
     static getFamilyMember = async ({ familyTreeId }) => {

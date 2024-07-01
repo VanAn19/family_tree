@@ -8,6 +8,8 @@ const router = express.Router();
 
 router.post('/signup', asyncHandler(accessController.signUp));
 router.post('/login', asyncHandler(accessController.login));
+router.get('/forgot-password', asyncHandler(accessController.forgotPassword));
+router.post('/reset-password', asyncHandler(accessController.resetPassword));
 
 router.use(authentication)
 

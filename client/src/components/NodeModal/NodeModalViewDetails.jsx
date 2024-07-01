@@ -54,6 +54,7 @@ const NodeModalViewDetails = ({ isOpen, onClose, node }) => {
                 <FormLabel>Tên: { node.name ? node.name : 'Không có' }</FormLabel>
                 <FormLabel>Căn cước công dân: { node.citizenIdentification ? node.citizenIdentification : 'Không có' }</FormLabel>
                 <FormLabel>Giới tính: { node.gender ? node.gender : 'Không có' }</FormLabel>
+                <FormLabel>Quan hệ: { node.relationship ? node.relationship : 'Không có' }</FormLabel>
                 <FormLabel>Ngày sinh: { node.dateOfBirth ? format(new Date(node.dateOfBirth), 'dd/MM/yyyy') : 'Không có' }</FormLabel>
                 <FormLabel>Tình trạng: { node.isAlive === 1 ? 'Còn sống' : 'Đã mất' }</FormLabel>
                 {!node.isAlive && (

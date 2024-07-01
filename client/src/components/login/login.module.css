@@ -95,6 +95,10 @@
     background-color: #f4f4f4;
 }
 
+.forgotPassword {
+    font-size: 10px;
+}
+
 .register:hover{
     color: #666;
 }
@@ -107,6 +111,20 @@
     line-height: 1.5rem;
     padding: 0.75rem 1.5rem;
     background-color: #f00;
+    color: #fff;
+    position: absolute;
+    top: 5rem;
+    right: 5rem;
+}
+
+.successMessage{
+    height: 70px;
+    width: 250px;
+    text-align: center;
+    border-radius: 20px;
+    line-height: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #00ff1e;
     color: #fff;
     position: absolute;
     top: 5rem;

@@ -8,7 +8,6 @@ import { login } from '../../redux/authSlice';
 import axios from "axios";
 import classes from './login.module.css';
 
-// Define validation schema
 const schema = yup.object().shape({
   username: yup.string().required('Tên người dùng là bắt buộc'),
   password: yup.string().required('Mật khẩu là bắt buộc'),
@@ -75,6 +74,7 @@ const Login = () => {
               <p className={classes.error}>{errors.password.message}</p>
             )}
           </label>
+          <Link to="/forgot-password"><p className={classes.forgotPassword}>Quên mật khẩu?</p></Link>
           <button className={classes.submitBtn}>Đăng nhập</button>
           <Link to="/register">
             Chưa có tài khoản? <p className={classes.register}>Đăng kí</p>

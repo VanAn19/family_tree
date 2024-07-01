@@ -54,7 +54,7 @@ const NodeModalAddFamilyTree = ({ isOpen, onClose, onSubmit }) => {
               {errors.name && <p className={classes.error}>{errors.name.message}</p>}
             </FormControl>
             <FormControl isInvalid={errors.ancestorName}>
-              <FormLabel>Họ tên tổ tiên</FormLabel>
+              <FormLabel>Họ tên vị tổ tiên đầu tiên</FormLabel>
               <Input
                 name="ancestorName"
                 {...register('ancestorName')}

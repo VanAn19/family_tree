@@ -3,15 +3,50 @@
 const { User } = require('../models');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const { BadRequestError, AuthFailureError, ForbiddenError } = require("../core/error.response");
+const { BadRequestError, AuthFailureError, ForbiddenError, NotFoundError } = require("../core/error.response");
 const KeyTokenService = require('./keyToken.service');
 const { createTokenPair } = require('../auth/authUtils');
-const { getInfoData } = require('../utils');
-const { findByUsername } = require('./user.service');
+const { getInfoData, sendMail } = require('../utils');
+// const { findByUsername, createPasswordChangedToken } = require('./user.service');
+const { findByUsername } = require('../repositories/access.repo');
 const { Sequelize } = require('sequelize');
 const { Op } = require('sequelize');
 
 class AccessService {
+
+    static forgotPassword = async ({ email }) => {
+        const user = await User.findOne({ where: {email} });
+        if (!user) throw new NotFoundError('Not found email');
+        const resetToken = user.createPasswordChangedToken();
+        await user.save();
+        const html = `Xin vui lòng click vào link dưới đây để thay đổi mật khẩu của bạn. Link này sẽ hết hạn sau 15 phút kể từ bây giờ. <a href="${process.env.URL_CLIENT}/reset-password/${resetToken}">Click here</a>`
+        const data = {
+            email,
+            html
+        }
+        const rs = await sendMail(data)
+        return rs           
+    }
+
+    static resetPassword = async ({ password, token }) => {
+        const passwordResetToken = crypto.createHash('sha256').update(token).digest('hex');
+        const user = await User.findOne({
+            where: {
+                passwordResetToken,
+                passwordResetExpires: {
+                    [Op.gt]: Date.now()
+                }
+            }
+        })
+        if (!user) throw new BadRequestError('Invalid reset token');
+        const passwordHash = await bcrypt.hash(password, 10);
+        user.password = passwordHash
+        user.passwordResetToken = undefined
+        user.passwordChangedAt = Date.now()
+        user.passwordResetExpires = undefined
+        await user.save()
+        return user
+    }
 
     static handlerRefreshToken = async ({ refreshToken, user, keyStore }) => {
         const { userId, username } = user;
@@ -37,7 +72,6 @@ class AccessService {
     }
 
     static logout = async (keyStore) => {
-        console.log(keyStore.id);
         return await KeyTokenService.removeKeyById(keyStore.id);
     }
 

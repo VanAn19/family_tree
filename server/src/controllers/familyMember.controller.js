@@ -11,7 +11,7 @@ class FamilyTreeController {
             metadata: await FamilyMemberService.addPartner({
                 ...req.body,
                 familyTreeId: req.params.familyTreeId
-            })
+            }, req.file)
         }).send(res)
     }
 
@@ -42,6 +42,16 @@ class FamilyTreeController {
         new CREATED({
             message: 'Add child successfully!',
             metadata: await FamilyMemberService.addChild({
+                ...req.body,
+                familyTreeId: req.params.familyTreeId
+            }, req.file)
+        }).send(res)
+    }
+
+    addParent = async (req,res,next) => {
+        new CREATED({
+            message: 'Add parent successfully!',
+            metadata: await FamilyMemberService.addParent({
                 ...req.body,
                 familyTreeId: req.params.familyTreeId
             }, req.file)

@@ -61,7 +61,11 @@ const NodeModalAddPartner = ({ isOpen, onClose, onSubmit }) => {
   });
 
   const handleFormSubmit = (data) => {
-    onSubmit(data);
+    const formData = {
+      ...data,
+      avatar: data.avatar && data.avatar.length > 0 ? data.avatar[0] : null, 
+    };
+    onSubmit(formData);
     reset();
   };
 
@@ -77,6 +81,15 @@ const NodeModalAddPartner = ({ isOpen, onClose, onSubmit }) => {
         <ModalCloseButton />
         <ModalBody>
           <form onSubmit={handleSubmit(handleFormSubmit)}>
+          <FormControl>
+              <FormLabel>Ảnh</FormLabel>
+              <Input
+                sx={{border: 'none'}}
+                type="file"
+                name="avatar"
+                {...register('avatar')}
+              />
+            </FormControl>
             <FormControl isInvalid={errors.name}>
               <FormLabel>Họ tên</FormLabel>
               <Input
@@ -112,6 +125,18 @@ const NodeModalAddPartner = ({ isOpen, onClose, onSubmit }) => {
                 <option value="Nữ">Nữ</option>
               </Select>
               {errors.gender && <p className={classes.error}>{errors.gender.message}</p>}
+            </FormControl>
+            <FormControl isInvalid={errors.relationship}>
+              <FormLabel>Quan hệ</FormLabel>
+              <Select
+                placeholder=" "
+                name="relationship"
+                {...register('relationship')}
+              >
+                <option value="Con dâu">Vợ</option>
+                <option value="Con rể">Chồng</option>
+              </Select>
+              {errors.relationship && <p className={classes.error}>{errors.relationship.message}</p>}
             </FormControl>
             <FormControl isInvalid={errors.isAlive}>
               <FormLabel>Tình trạng</FormLabel>

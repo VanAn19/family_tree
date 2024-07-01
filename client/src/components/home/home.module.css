@@ -1,5 +1,13 @@
-.node {
-    width: 50px;
+.errorMessage{
     height: 70px;
-    background-color: #fff;
+    width: 250px;
+    text-align: center;
+    border-radius: 20px;
+    line-height: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #f00;
+    color: #fff;
+    position: absolute;
+    top: 5rem;
+    right: 5rem;
 }

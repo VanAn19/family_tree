@@ -31,7 +31,6 @@ const deleteDescendants = async (member) => {
                 familyTreeId: member.familyTreeId
             }
         });
-
         for (const child of childrenMembers) {
             await deleteDescendants(child); 
             await child.destroy();

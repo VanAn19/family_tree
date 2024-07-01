@@ -21,6 +21,7 @@ const schema = yup.object().shape({
     .max(50, 'Họ tên không được vượt quá 50 ký tự'),
   dateOfBirth: yup.date().required('Ngày sinh là bắt buộc'),
   gender: yup.string().required('Giới tính là bắt buộc'),
+  relationship: yup.string().required('Quan hệ là bắt buộc'),
   isAlive: yup.string().required('Tình trạng là bắt buộc'),
   deathOfBirth: yup.date()
     .nullable()
@@ -73,7 +74,7 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
     // }
     const formData = {
       ...data,
-      avatar: data.avatar[0] || null, 
+      avatar: data.avatar && data.avatar.length > 0 ? data.avatar[0] : null, 
     };
     onSubmit(formData);
     reset();
@@ -135,6 +136,18 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
                 <option value="Nữ">Nữ</option>
               </Select>
               {errors.gender && <p className={classes.error}>{errors.gender.message}</p>}
+            </FormControl>
+            <FormControl isInvalid={errors.relationship}>
+              <FormLabel>Quan hệ</FormLabel>
+              <Select
+                placeholder=" "
+                name="relationship"
+                {...register('relationship')}
+              >
+                <option value="Con đẻ">Con đẻ</option>
+                <option value="Con nuôi">Con nuôi</option>
+              </Select>
+              {errors.relationship && <p className={classes.error}>{errors.relationship.message}</p>}
             </FormControl>
             <FormControl isInvalid={errors.isAlive}>
               <FormLabel>Tình trạng</FormLabel>
