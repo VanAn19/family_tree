@@ -25,6 +25,12 @@ class FamilyMemberService {
         if (file) {
             avatarUrl = file.path;
         }
+        let determinedRelationship;
+        if (foundPartner.isAncestor) {
+            determinedRelationship = relationship === "Con dâu" ? "Vợ" : "Chồng";
+        } else {
+            determinedRelationship = relationship;
+        }
         const newPartner = await FamilyMember.create({
             familyTreeId,
             partnerId,
@@ -34,7 +40,7 @@ class FamilyMemberService {
             dateOfBirth,
             gender,
             avatar: avatarUrl,
-            relationship,
+            relationship: determinedRelationship,
             job,
             isAlive,
             deathOfBirth
@@ -195,15 +201,19 @@ class FamilyMemberService {
         if (relationship === "Bố") {
             await foundMember.update({
                 fatherId: newParent.id,
-                isAncestor: false
+                isAncestor: false,
+                relationship: null
             });
         }
         if (relationship === "Mẹ") {
             await foundMember.update({
                 motherId: newParent.id,
-                isAncestor: false
+                isAncestor: false,
+                relationship: null
             });
         }
+        const foundPartnerMember = await FamilyMember.findOne({ where: {id: foundMember.partnerId} });
+        foundPartnerMember.relationship === "Vợ" ? await foundPartnerMember.update({relationship: "Con dâu"}) : await foundPartnerMember.update({relationship: "Con rể"})
         return newParent
     }
 
