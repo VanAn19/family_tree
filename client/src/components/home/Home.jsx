@@ -16,18 +16,6 @@ import images from "../../assets";
 
 const Tree = lazy(() => import("react-d3-tree"));
 
-const bfs = (id, tree, node) => {
-  const queue = [tree];
-  while (queue.length > 0) {
-    const curNode = queue.pop();
-    if (curNode.attributes?.id === id) {
-      curNode.children.push(node);
-      return { ...tree };
-    }
-    curNode.children.forEach(child => queue.unshift(child));
-  }
-};
-
 // const convertToTree = (data) => {
 //   const map = new Map(data.map(item => [item.id, { ...item, children: [] }]));
 //   let root = null;
@@ -347,9 +335,8 @@ const Home = () => {
           }}
           onClick={(event) => click(nodeDatum, event)}
         >
-          {/* {truncateText(nodeDatum.name, 15)} */}
           <div>{truncateText(nodeDatum.name, 15)}</div>
-          <div>{nodeDatum.relationship ? truncateText(nodeDatum.relationship, 15) : ''}</div>
+          <div>{nodeDatum.relationship && !nodeDatum.isAncestor ? truncateText(nodeDatum.relationship, 15) : ''}</div>
           <div>{nodeDatum.isAncestor ? 'Tổ tiên' : ''}</div>
         </div>
       </foreignObject>
@@ -393,7 +380,7 @@ const Home = () => {
               }}
             >             
               <div>{truncateText(nodeDatum.partner.name, 15)}</div>
-              <div>{nodeDatum.partner.relationship ? truncateText(nodeDatum.partner.relationship, 15) : ''}</div>
+              <div>{nodeDatum.partner.relationship && !nodeDatum.isAncestor ? truncateText(nodeDatum.partner.relationship, 15) : 'Vợ'}</div>
             </div>
           </foreignObject>
           {avatars.map((data) => {

@@ -12,7 +12,7 @@ import { FormControl, FormLabel, Input, Select, Image } from "@chakra-ui/react";
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import classes from "./NodeModal.module.css"
 
 const schema = yup.object().shape({

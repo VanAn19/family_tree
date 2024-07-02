@@ -155,7 +155,7 @@ class FamilyMemberService {
     static addParent = async (payload, file) => {
         const {
             familyTreeId, id, childrenId, name, citizenIdentification,
-            dateOfBirth, gender, avatar, job, isAlive, deathOfBirth
+            dateOfBirth, gender, relationship, avatar, job, isAlive, deathOfBirth
         } = payload
         let avatarUrl = null;
         if (file) {
@@ -185,19 +185,20 @@ class FamilyMemberService {
             citizenIdentification,
             dateOfBirth,
             gender,
+            relationship,
             avatar: avatarUrl,
             job,
             isAncestor: true,
             isAlive,
             deathOfBirth
         });
-        if (gender === "Nam") {
+        if (relationship === "Bố") {
             await foundMember.update({
                 fatherId: newParent.id,
                 isAncestor: false
             });
         }
-        if (gender === "Nữ") {
+        if (relationship === "Mẹ") {
             await foundMember.update({
                 motherId: newParent.id,
                 isAncestor: false

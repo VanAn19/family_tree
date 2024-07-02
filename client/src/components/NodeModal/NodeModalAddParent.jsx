@@ -126,6 +126,18 @@ const NodeModalAddParent = ({ isOpen, onClose, onSubmit }) => {
               </Select>
               {errors.gender && <p className={classes.error}>{errors.gender.message}</p>}
             </FormControl>
+            <FormControl isInvalid={errors.relationship}>
+              <FormLabel>Quan hệ</FormLabel>
+              <Select
+                placeholder=" "
+                name="relationship"
+                {...register('relationship')}
+              >
+                <option value="Bố">Bố</option>
+                <option value="Mẹ">Mẹ</option>
+              </Select>
+              {errors.relationship && <p className={classes.error}>{errors.relationship.message}</p>}
+            </FormControl>
             <FormControl isInvalid={errors.isAlive}>
               <FormLabel>Tình trạng</FormLabel>
               <Select
