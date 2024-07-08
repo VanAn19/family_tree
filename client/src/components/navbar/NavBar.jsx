@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useSelector, useDispatch } from "react-redux";
 import { Box, List, ListItem, Link, Menu, MenuButton, MenuList, MenuItem, IconButton, Input, Button } from '@chakra-ui/react';
-import { AddIcon, SettingsIcon } from '@chakra-ui/icons'
+import { AddIcon, SettingsIcon, ArrowLeftIcon, ArrowRightIcon } from '@chakra-ui/icons'
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../../redux/authSlice';
 import NodeModalAddFamilyTree from '../NodeModal/NodeModalAddFamilyTree';
@@ -14,6 +14,7 @@ const NavBar = () => {
   const [editingTreeId, setEditingTreeId] = useState(null);
   const [editingTreeName, setEditingTreeName] = useState('');
   const [selectedTreeId, setSelectedTreeId] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, token } = useSelector(state => state.auth);
@@ -113,54 +114,70 @@ const NavBar = () => {
     }
   };
 
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
   return (
-    <Box w="250px" h="100vh" p="4" bg="gray.200" sx={{borderRadius: '5px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
+    <Box w={isCollapsed ? "50px" : "250px"} h="100vh" p="4" bg="gray.200" sx={{ borderRadius: '5px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', transition: 'width 0.3s' }}>
       <Box>
-        <div className={classes.user}>Xin chào, {user.name}</div>
-        <div className={classes.icon} onClick={openAddFamilyTreeModal}>        
-          <AddIcon/>
-        </div>
-        <List spacing={3}>
-          {familyTrees.map(tree => (
-            <ListItem 
-              key={tree.id} 
-              className={`${classes.node} ${selectedTreeId === tree.id ? classes.selectedNode : ''}`}
-            >
-              {editingTreeId === tree.id ? (
-                <Input
-                  value={editingTreeName}
-                  onChange={(e) => setEditingTreeName(e.target.value)}
-                  onBlur={() => handleSaveEditTree(tree.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSaveEditTree(tree.id);
-                    }
-                  }}
-                />
-              ) : (
-                <Link className={classes.nodeChild} onClick={() => handleSelectTree(tree.id)}>
-                  {tree.name}
-                </Link>
-              )}
-              <Menu>
-                <MenuButton as={IconButton} icon={<SettingsIcon />} variant="none" />
-                <MenuList>
-                  <MenuItem onClick={() => handleEditTree(tree.id)}>Đổi tên</MenuItem>
-                  <MenuItem onClick={() => handleDeleteTree(tree.id)}>Xóa</MenuItem>
-                </MenuList>
-              </Menu>
-            </ListItem>
-          ))}
-        </List>
-        <NodeModalAddFamilyTree
-          isOpen={isAddFamilyTreeModalOpen}
-          onClose={closeAddFamilyTreeModal}
-          onSubmit={handleSubmitAddFamilyTree}
+        <IconButton 
+          icon={isCollapsed ? <ArrowRightIcon /> : <ArrowLeftIcon />} 
+          onClick={toggleCollapse} 
+          mb="4"
+          aria-label="Toggle collapse"
         />
+        {!isCollapsed && (
+          <>
+            <div className={classes.user}>Xin chào, {user.name}</div>
+            <div className={classes.icon} onClick={openAddFamilyTreeModal}>        
+              <AddIcon />
+            </div>
+            <List spacing={3}>
+              {familyTrees.map(tree => (
+                <ListItem 
+                  key={tree.id} 
+                  className={`${classes.node} ${selectedTreeId === tree.id ? classes.selectedNode : ''}`}
+                >
+                  {editingTreeId === tree.id ? (
+                    <Input
+                      value={editingTreeName}
+                      onChange={(e) => setEditingTreeName(e.target.value)}
+                      onBlur={() => handleSaveEditTree(tree.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSaveEditTree(tree.id);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <Link className={classes.nodeChild} onClick={() => handleSelectTree(tree.id)}>
+                      {tree.name}
+                    </Link>
+                  )}
+                  <Menu>
+                    <MenuButton as={IconButton} icon={<SettingsIcon />} variant="none" />
+                    <MenuList>
+                      <MenuItem onClick={() => handleEditTree(tree.id, tree.name)}>Đổi tên</MenuItem>
+                      <MenuItem onClick={() => handleDeleteTree(tree.id)}>Xóa</MenuItem>
+                    </MenuList>
+                  </Menu>
+                </ListItem>
+              ))}
+            </List>
+            <NodeModalAddFamilyTree
+              isOpen={isAddFamilyTreeModalOpen}
+              onClose={closeAddFamilyTreeModal}
+              onSubmit={handleSubmitAddFamilyTree}
+            />
+          </>
+        )}
       </Box>
-      <Button onClick={handleLogout} colorScheme="red" mt="auto">
-        Đăng xuất
-      </Button>
+      {!isCollapsed && (
+        <Button onClick={handleLogout} colorScheme="red" mt="auto">
+          Đăng xuất
+        </Button>
+      )}
     </Box>
   );
 };

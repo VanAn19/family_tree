@@ -19,11 +19,10 @@ const schema = yup.object().shape({
   name: yup.string()
     .required('Họ tên người dùng là bắt buộc')
     .max(50, 'Họ tên không được vượt quá 50 ký tự'),
-  dateOfBirth: yup.date().required('Ngày sinh là bắt buộc'),
   gender: yup.string().required('Giới tính là bắt buộc'),
   relationship: yup.string().required('Quan hệ là bắt buộc'),
   isAlive: yup.string().required('Tình trạng là bắt buộc'),
-  deathOfBirth: yup.date()
+  deathOfBirth: yup.string()
     .nullable()
     .test(
       'is-greater',
@@ -31,7 +30,8 @@ const schema = yup.object().shape({
       function (value) {
         const { dateOfBirth, isAlive } = this.parent;
         if (isAlive === 'false' && value) {
-          return value > dateOfBirth;
+          // return value > dateOfBirth;
+          return new Date(value) > new Date(dateOfBirth);
         }
         return true;
       }
@@ -62,16 +62,6 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
   });
 
   const handleFormSubmit = (data) => {
-    // const formData = new FormData();
-    // Object.keys(data).forEach(key => {
-    //   formData.append(key, data[key]);
-    // });
-
-    // console.log(data.avatar);
-
-    // if (data.avatar && data.avatar[0]) {
-    //   formData.append('avatar', data.avatar[0]);
-    // }
     const formData = {
       ...data,
       avatar: data.avatar && data.avatar.length > 0 ? data.avatar[0] : null, 
@@ -102,7 +92,7 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
               />
             </FormControl>
             <FormControl isInvalid={errors.name}>
-              <FormLabel>Họ tên</FormLabel>
+              <FormLabel>Họ tên <span className={classes.required}>*</span></FormLabel>
               <Input
                 name="name"
                 {...register('name')}
@@ -117,9 +107,9 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
               />
             </FormControl>
             <FormControl isInvalid={errors.dateOfBirth}>
-              <FormLabel>Ngày sinh</FormLabel>
+              <FormLabel>Ngày sinh (Nhập theo định dạng ngày/tháng/năm)</FormLabel>
               <Input
-                type="date"
+                type="text"
                 name="dateOfBirth"
                 {...register('dateOfBirth')}
               />
@@ -128,7 +118,7 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
             <FormControl isInvalid={errors.gender}>
               <FormLabel>Giới tính</FormLabel>
               <Select
-                placeholder=" "
+                placeholder="-Chọn giới tính-"
                 name="gender"
                 {...register('gender')}
               >
@@ -140,7 +130,7 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
             <FormControl isInvalid={errors.relationship}>
               <FormLabel>Quan hệ</FormLabel>
               <Select
-                placeholder=" "
+                placeholder="-Chọn quan hệ-"
                 name="relationship"
                 {...register('relationship')}
               >
@@ -152,7 +142,7 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
             <FormControl isInvalid={errors.isAlive}>
               <FormLabel>Tình trạng</FormLabel>
               <Select
-                placeholder=" "
+                placeholder="-Chọn tình trạng-"
                 name="isAlive"
                 {...register('isAlive')}
                 onChange={handleIsAliveChange}
@@ -166,7 +156,7 @@ const NodeModalAddChild = ({ isOpen, onClose, onSubmit }) => {
               <FormControl>
                 <FormLabel>Ngày mất</FormLabel>
                 <Input
-                  type="date"
+                  type="text"
                   name="deathOfBirth"
                   {...register('deathOfBirth')}
                   disabled={isAlive === 'true'}

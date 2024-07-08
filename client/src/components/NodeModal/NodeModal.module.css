@@ -4,3 +4,6 @@
     margin: 4px 0;
     font-size: 12px;
 }
+.required {
+    color: red;
+}

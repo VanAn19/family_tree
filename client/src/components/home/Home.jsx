@@ -7,10 +7,11 @@ import NodeModalAddPartner from "../NodeModal/NodeModalAddPartner";
 import NodeModalAddChild from "../NodeModal/NodeModalAddChild";
 import NodeModalEditInfo from "../NodeModal/NodeModalEditInfo";
 import NodeContextMenu from "../NodeContextMenu/NodeContextMenu";
+import PreviewModal from "../NodeModal/PreviewModal";
 import NavBar from "../navbar/NavBar";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { useDisclosure } from "@chakra-ui/react"; 
+import { useDisclosure, Button } from "@chakra-ui/react"; 
 import classes from "./home.module.css"
 import images from "../../assets";
 
@@ -82,7 +83,7 @@ const Home = () => {
   const [isAddPartnerModalOpen, setIsAddPartnerModalOpen] = useState(false);
   const [isAddChildModalOpen, setIsAddChildModalOpen] = useState(false);
   const [isEditInfoModalOpen, setIsEditInfoModalOpen] = useState(false);
-  const [error, setError] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const { user, token } = useSelector(state => state.auth);
   const { familyTreeId } = useParams(); 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -118,15 +119,6 @@ const Home = () => {
     }
   }, [familyTreeId]);
 
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError(false);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
-
   const handleNodeClick = (datum, event) => {
     setNode(datum);
     setMenuPosition({ x: event.clientX, y: event.clientY });
@@ -153,21 +145,14 @@ const Home = () => {
         fetchFamilyTree(familyTreeId);
         fetchAvatar(familyTreeId);
         closeAddParentModal();
-      } else {
-        setError(true);
-      }
+      } 
     } catch (error) {
       console.error("Error adding parent:", error);
     }
   };
 
   const openAddParentModal = () => {
-    if (node && (node.fatherId || node.motherId)) {
-      setError(true);
-    } else {
-      setIsAddParentModalOpen(true);
-      setError(false);
-    }
+    setIsAddParentModalOpen(true);
   };
   
   const closeAddParentModal = () => {
@@ -291,68 +276,87 @@ const Home = () => {
     }
   };
 
+  const openPreviewModal = () => {
+    setIsPreviewOpen(true);
+  };
+
+  const closePreviewModal = () => {
+    setIsPreviewOpen(false);
+  };
+
   function truncateText(text, maxLength) {
     if (text.length <= maxLength) {
       return text;
     }
     return text.substring(0, maxLength) + '...';
   }
+
+  const renderRedStripes = (x, y, width) => (
+    <>
+      <path d={`M${x - width / 2},${y - 70} C${x - width / 4},${y - 55} ${x + width / 4},${y - 55} ${x + width / 2},${y - 70}`} stroke="gray" strokeWidth="2" fill="none" />
+      <path d={`M${x - width / 2},${y - 65} C${x - width / 4},${y - 50} ${x + width / 4},${y - 50} ${x + width / 2},${y - 65}`} stroke="gray" strokeWidth="2" fill="none" />
+      <path d={`M${x - width / 2},${y - 60} C${x - width / 4},${y - 45} ${x + width / 4},${y - 45} ${x + width / 2},${y - 60}`} stroke="gray" strokeWidth="2" fill="none" />
+    </>
+  );
   
   const renderRectSvgNode = ({ nodeDatum }, click) => (
     <g>
-      {nodeDatum.partner && (
-        <line
-          x1="0"
-          y1="0"
-          x2="150"
-          y2="0"
-          stroke="black"
-          strokeWidth="1"
-        />
-      )}
-      {nodeDatum.gender === "Nam" && (
-        <image href={images.nodeMale} width="250" height="150" x="-125" y="-75" />
-      )}
-      {nodeDatum.gender === "Nữ" && (
-        <image href={images.nodeFemale} width="250" height="150" x="-125" y="-75" />
-      )}
-      <foreignObject x="-125" y="30" width="250" height="30">
-        <div
-          xmlns="http://www.w3.org/1999/xhtml"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            height: "100%",
-            overflow: "hidden",
-            whiteSpace: "nowrap",
-            textOverflow: "ellipsis",
-            fontSize: "12px",
-            color: "black",
-            textAlign: "center"
-          }}
-          onClick={(event) => click(nodeDatum, event)}
-        >
-          <div>{truncateText(nodeDatum.name, 15)}</div>
-          <div>{nodeDatum.relationship && !nodeDatum.isAncestor ? truncateText(nodeDatum.relationship, 15) : ''}</div>
-          <div>{nodeDatum.isAncestor ? 'Tổ tiên' : ''}</div>
-        </div>
-      </foreignObject>
-      {avatars.map((data) => {
-        if (data.id === nodeDatum.id) {
-          if (data.avatar) {
-            return (
-              <image key={data.id} href={`http://localhost:4000/${data.avatar}`} alt="" width="250" height="100" x="-125" y="-75" />
-            )
-          } else {
-            return (
-              <image key={data.id} href={data.gender === "Nam" ? images.defaultMaleAvatar : images.defaultFemaleAvatar} alt="" width="250" height="100" x="-125" y="-75" />
-            )
+      <g onClick={(event) => click(nodeDatum, event)}>
+        {nodeDatum.partner && (
+          <line
+            x1="0"
+            y1="0"
+            x2="150"
+            y2="0"
+            stroke="black"
+            strokeWidth="1"
+          />
+        )}
+        {/* {nodeDatum.gender === "Nam" && (
+          <image href={images.nodeMale} width="250" height="150" x="-125" y="-75" />
+        )}
+        {nodeDatum.gender === "Nữ" && (
+          <image href={images.nodeFemale} width="250" height="150" x="-125" y="-75" />
+        )} */}
+        {nodeDatum.gender === "Nam" ? (<image href={images.nodeMale} width="250" height="150" x="-125" y="-75" />) : (<image href={images.nodeFemale} width="250" height="150" x="-125" y="-75" />) }
+        {avatars.map((data) => {
+          if (data.id === nodeDatum.id) {
+            if (data.avatar) {
+              return (
+                <image key={data.id} href={`http://localhost:4000/${data.avatar}`} alt="" width="250" height="100" x="-125" y="-75" />
+              )
+            } else {
+              return (
+                <image key={data.id} href={data.gender === "Nam" ? images.defaultMaleAvatar : images.defaultFemaleAvatar} alt="" width="250" height="100" x="-125" y="-75" />
+              )
+            }
           }
-        }
-      })}
+        })}
+        {nodeDatum.isAlive == false && renderRedStripes(0, 0, 115)}
+        <foreignObject x="-125" y="30" width="250" height="30">
+          <div
+            xmlns="http://www.w3.org/1999/xhtml"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
+              height: "100%",
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
+              fontSize: "12px",
+              color: "black",
+              textAlign: "center"
+            }}
+          >
+            <div>{truncateText(nodeDatum.name, 15)}</div>
+            <div>{nodeDatum.relationship && !nodeDatum.isAncestor ? truncateText(nodeDatum.relationship, 15) : ''}</div>
+            <div>{nodeDatum.isAncestor ? 'Tổ tiên' : ''}</div>
+          </div>
+        </foreignObject>
+      </g>
       {nodeDatum.partner && (
         <g transform={'translate(150, 0)'} onClick={(event) => click(nodeDatum.partner, event)}>
           {nodeDatum.partner.gender === "Nam" && (
@@ -361,6 +365,20 @@ const Home = () => {
           {nodeDatum.partner.gender === "Nữ" && (
             <image href={images.nodeFemale} width="250" height="150" x="-125" y="-75" />
           )}
+          {avatars.map((data) => {
+            if (data.id === nodeDatum.partner.id) {
+              if (data.avatar) {
+                return (
+                  <image key={data.id} href={`http://localhost:4000/${data.avatar}`} alt="" width="250" height="100" x="-125" y="-75" />
+                )
+              } else {
+                return (
+                  <image key={data.id} href={data.gender === "Nam" ? images.defaultMaleAvatar : images.defaultFemaleAvatar} alt="" width="250" height="100" x="-125" y="-75" />
+                )
+              }
+            }
+          })}
+          {nodeDatum.partner.isAlive == false && renderRedStripes(0, 0, 115)}
           <foreignObject x="-125" y="30" width="250" height="30">
             <div
               xmlns="http://www.w3.org/1999/xhtml"
@@ -383,19 +401,6 @@ const Home = () => {
               <div>{nodeDatum.partner.relationship && !nodeDatum.isAncestor ? truncateText(nodeDatum.partner.relationship, 15) : 'Vợ'}</div>
             </div>
           </foreignObject>
-          {avatars.map((data) => {
-            if (data.id === nodeDatum.partner.id) {
-              if (data.avatar) {
-                return (
-                  <image key={data.id} href={`http://localhost:4000/${data.avatar}`} alt="" width="250" height="100" x="-125" y="-75" />
-                )
-              } else {
-                return (
-                  <image key={data.id} href={data.gender === "Nam" ? images.defaultMaleAvatar : images.defaultFemaleAvatar} alt="" width="250" height="100" x="-125" y="-75" />
-                )
-              }
-            }
-          })}
         </g>
       )}
     </g>
@@ -405,6 +410,9 @@ const Home = () => {
     <Stack direction="row" spacing="md" bg="#e8c77b">
       <NavBar />
       <Box w="100%" h="100vh">
+        <Button onClick={openPreviewModal} colorScheme="teal" position="absolute" top="20px" right="20px">
+          Preview
+        </Button>
         {tree ? (
           <Suspense fallback={<div>Loading...</div>}>
             <Tree
@@ -428,6 +436,7 @@ const Home = () => {
           <NodeContextMenu
             x={menuPosition.x}
             y={menuPosition.y}
+            node={node}
             onAddParent={openAddParentModal}
             onAddPartner={openAddPartnerModal}
             onAddChild={openAddChildModal}
@@ -465,11 +474,11 @@ const Home = () => {
           onSubmit={handleEditInfo}
           initialData={node}
         />
-        {error && (
-          <div className={classes.errorMessage}>
-            Không thể thêm bố mẹ khi bố mẹ đã tồn tại.
-          </div>
-        )}
+        <PreviewModal
+          isOpen={isPreviewOpen}
+          onClose={closePreviewModal}
+          treeData={tree}
+        />
       </Box>
     </Stack>
   );

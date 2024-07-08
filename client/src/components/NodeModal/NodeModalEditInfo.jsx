@@ -19,10 +19,9 @@ const schema = yup.object().shape({
   name: yup.string()
     .required('Họ tên người dùng là bắt buộc')
     .max(50, 'Họ tên không được vượt quá 50 ký tự'),
-  dateOfBirth: yup.date().required('Ngày sinh là bắt buộc'),
   gender: yup.string().required('Giới tính là bắt buộc'),
   isAlive: yup.string().required('Tình trạng là bắt buộc'),
-  deathOfBirth: yup.date()
+  deathOfBirth: yup.string()
     .nullable()
     .test(
       'is-greater',
@@ -30,7 +29,8 @@ const schema = yup.object().shape({
       function (value) {
         const { dateOfBirth, isAlive } = this.parent;
         if (isAlive === 'false' && value) {
-          return value > dateOfBirth;
+          // return value > dateOfBirth;
+          return new Date(value) > new Date(dateOfBirth);
         }
         return true;
       }
@@ -135,7 +135,7 @@ const NodeModalEditInfo = ({ isOpen, onClose, onSubmit, initialData }) => {
             <FormControl isInvalid={errors.dateOfBirth}>
               <FormLabel>Ngày sinh</FormLabel>
               <Input
-                type="date"
+                type="text"
                 name="dateOfBirth"
                 {...register('dateOfBirth')}
               />
@@ -181,7 +181,7 @@ const NodeModalEditInfo = ({ isOpen, onClose, onSubmit, initialData }) => {
               <FormControl>
                 <FormLabel>Ngày mất</FormLabel>
                 <Input
-                  type="date"
+                  type="text"
                   name="deathOfBirth"
                   {...register('deathOfBirth')}
                   disabled={isAlive === 'true'}

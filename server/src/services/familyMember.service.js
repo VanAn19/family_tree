@@ -4,7 +4,7 @@ const { where } = require('sequelize');
 const { BadRequestError, NotFoundError } = require('../core/error.response');
 const { FamilyTree, FamilyMember } = require('../models');
 const { Op } = require('sequelize');
-const { findAllMemberByFamilyTreeId, deleteDescendants } = require('../repositories/familyMember.repo');
+const { findAllMemberByFamilyTreeId, deleteDescendants, calculateAge } = require('../repositories/familyMember.repo');
 const { Sequelize } = require('sequelize');
 
 class FamilyMemberService {
@@ -31,6 +31,7 @@ class FamilyMemberService {
         } else {
             determinedRelationship = relationship;
         }
+        const age = calculateAge(dateOfBirth, isAlive, deathOfBirth);
         const newPartner = await FamilyMember.create({
             familyTreeId,
             partnerId,
@@ -43,7 +44,8 @@ class FamilyMemberService {
             relationship: determinedRelationship,
             job,
             isAlive,
-            deathOfBirth
+            deathOfBirth,
+            age
         });
         // const updatePartner = await FamilyMember.findOne({ where: {id: partnerId} });
         await foundPartner.update({partnerId: newPartner.id})
@@ -113,6 +115,9 @@ class FamilyMemberService {
         }
         const foundMember = await FamilyMember.findOne({ where: {id} });
         const foundPartnerMember = await FamilyMember.findOne({ where: {id: foundMember.partnerId}});
+
+        const age = calculateAge(dateOfBirth, isAlive, deathOfBirth);
+
         let newChild;
         if (foundMember.gender === "Nam") {
             newChild = await FamilyMember.create({
@@ -128,7 +133,8 @@ class FamilyMemberService {
                 relationship,
                 job,
                 isAlive,
-                deathOfBirth
+                deathOfBirth,
+                age
             });
         }
         if (foundMember.gender === "Nữ") {
@@ -144,7 +150,8 @@ class FamilyMemberService {
                 avatar: avatarUrl,
                 job,
                 isAlive,
-                deathOfBirth
+                deathOfBirth,
+                age: birthDayAge
             });
         }
         await foundMember.update({
@@ -167,6 +174,7 @@ class FamilyMemberService {
         if (file) {
             avatarUrl = file.path;
         }
+        const age = calculateAge(dateOfBirth, isAlive, deathOfBirth);
         const foundMember = await FamilyMember.findOne({ where: {id} });
         if (foundMember.isAncestor !== true) throw new BadRequestError('Cannot add parent');
         let existingChildrenIds = [];
@@ -196,7 +204,8 @@ class FamilyMemberService {
             job,
             isAncestor: true,
             isAlive,
-            deathOfBirth
+            deathOfBirth,
+            age
         });
         if (relationship === "Bố") {
             await foundMember.update({
@@ -213,7 +222,7 @@ class FamilyMemberService {
             });
         }
         const foundPartnerMember = await FamilyMember.findOne({ where: {id: foundMember.partnerId} });
-        foundPartnerMember.relationship === "Vợ" ? await foundPartnerMember.update({relationship: "Con dâu"}) : await foundPartnerMember.update({relationship: "Con rể"})
+        if (foundPartnerMember) foundPartnerMember.relationship === "Vợ" ? await foundPartnerMember.update({relationship: "Con dâu"}) : await foundPartnerMember.update({relationship: "Con rể"})
         return newParent
     }
 

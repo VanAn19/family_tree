@@ -36,7 +36,10 @@ module.exports = {
         type: Sequelize.STRING
       },
       dateOfBirth: {
-        type: Sequelize.DATE
+        type: Sequelize.STRING
+      },
+      age: {
+        type: Sequelize.INTEGER
       },
       gender: {
         type: Sequelize.STRING
@@ -54,7 +57,7 @@ module.exports = {
         type: Sequelize.BOOLEAN
       },
       deathOfBirth: {
-        type: Sequelize.DATE
+        type: Sequelize.STRING
       },
       isAncestor: {
         type: Sequelize.BOOLEAN,
