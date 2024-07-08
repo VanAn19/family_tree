@@ -13,7 +13,22 @@ import React, { useState } from "react";
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { parse, isAfter, isValid } from 'date-fns';
 import classes from "./NodeModal.module.css"
+
+const parseDate = (value, originalValue) => {
+  const formats = ['dd/MM/yyyy', 'yyyy', 'MM/yyyy'];
+  let date = null;
+
+  for (const formatStr of formats) {
+    date = parse(originalValue, formatStr, new Date());
+    if (isValid(date)) {
+      return date;
+    }
+  }
+
+  return new Date('');
+};
 
 const schema = yup.object().shape({
   name: yup.string()
@@ -30,8 +45,9 @@ const schema = yup.object().shape({
       function (value) {
         const { dateOfBirth, isAlive } = this.parent;
         if (isAlive === 'false' && value) {
-          // return value > dateOfBirth;
-          return new Date(value) > new Date(dateOfBirth);
+          const dateOfBirthParsed = parseDate(dateOfBirth, dateOfBirth);
+          const deathOfBirthParsed = parseDate(value, value);
+          return isAfter(deathOfBirthParsed, dateOfBirthParsed);
         }
         return true;
       }
