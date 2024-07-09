@@ -7,10 +7,10 @@ import NodeModalAddPartner from "../NodeModal/NodeModalAddPartner";
 import NodeModalAddChild from "../NodeModal/NodeModalAddChild";
 import NodeModalEditInfo from "../NodeModal/NodeModalEditInfo";
 import NodeContextMenu from "../NodeContextMenu/NodeContextMenu";
-import PreviewModal from "../NodeModal/PreviewModal";
+import PreviewModal from "../PreviewModal/PreviewModal";
 import NavBar from "../navbar/NavBar";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useDisclosure, Button } from "@chakra-ui/react"; 
 import classes from "./home.module.css"
 import images from "../../assets";
@@ -291,7 +291,7 @@ const Home = () => {
     return text.substring(0, maxLength) + '...';
   }
 
-  const renderRedStripes = (x, y, width) => (
+  const renderStripes = (x, y, width) => (
     <>
       <path d={`M${x - width / 2},${y - 70} C${x - width / 4},${y - 55} ${x + width / 4},${y - 55} ${x + width / 2},${y - 70}`} stroke="gray" strokeWidth="2" fill="none" />
       <path d={`M${x - width / 2},${y - 65} C${x - width / 4},${y - 50} ${x + width / 4},${y - 50} ${x + width / 2},${y - 65}`} stroke="gray" strokeWidth="2" fill="none" />
@@ -312,14 +312,8 @@ const Home = () => {
             strokeWidth="1"
           />
         )}
-        {/* {nodeDatum.gender === "Nam" && (
-          <image href={images.nodeMale} width="250" height="150" x="-125" y="-75" />
-        )}
-        {nodeDatum.gender === "Nữ" && (
-          <image href={images.nodeFemale} width="250" height="150" x="-125" y="-75" />
-        )} */}
         {nodeDatum.gender === "Nam" ? (<image href={images.nodeMale} width="250" height="150" x="-125" y="-75" />) : (<image href={images.nodeFemale} width="250" height="150" x="-125" y="-75" />) }
-        {avatars.map((data) => {
+        {avatars?.map((data) => {
           if (data.id === nodeDatum.id) {
             if (data.avatar) {
               return (
@@ -332,7 +326,7 @@ const Home = () => {
             }
           }
         })}
-        {nodeDatum.isAlive == false && renderRedStripes(0, 0, 115)}
+        {nodeDatum.isAlive == false && renderStripes(0, 0, 115)}
         <foreignObject x="-125" y="30" width="250" height="30">
           <div
             xmlns="http://www.w3.org/1999/xhtml"
@@ -359,13 +353,8 @@ const Home = () => {
       </g>
       {nodeDatum.partner && (
         <g transform={'translate(150, 0)'} onClick={(event) => click(nodeDatum.partner, event)}>
-          {nodeDatum.partner.gender === "Nam" && (
-            <image href={images.nodeMale} width="250" height="150" x="-125" y="-75" />
-          )}
-          {nodeDatum.partner.gender === "Nữ" && (
-            <image href={images.nodeFemale} width="250" height="150" x="-125" y="-75" />
-          )}
-          {avatars.map((data) => {
+          {nodeDatum.partner.gender === "Nam" ? (<image href={images.nodeMale} width="250" height="150" x="-125" y="-75" />) : (<image href={images.nodeFemale} width="250" height="150" x="-125" y="-75" />) }
+          {avatars?.map((data) => {
             if (data.id === nodeDatum.partner.id) {
               if (data.avatar) {
                 return (
@@ -378,7 +367,7 @@ const Home = () => {
               }
             }
           })}
-          {nodeDatum.partner.isAlive == false && renderRedStripes(0, 0, 115)}
+          {nodeDatum.partner.isAlive == false && renderStripes(0, 0, 115)}
           <foreignObject x="-125" y="30" width="250" height="30">
             <div
               xmlns="http://www.w3.org/1999/xhtml"
@@ -410,7 +399,7 @@ const Home = () => {
     <Stack direction="row" spacing="md" bg="#e8c77b">
       <NavBar />
       <Box w="100%" h="100vh">
-        <Button onClick={openPreviewModal} colorScheme="teal" position="absolute" top="20px" right="20px">
+        <Button as={Link} to={`/home/preview/${familyTreeId}`} colorScheme="teal" position="absolute" top="20px" right="20px">
           Preview
         </Button>
         {tree ? (

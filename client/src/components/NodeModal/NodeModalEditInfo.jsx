@@ -12,13 +12,37 @@ import { FormControl, FormLabel, Input, Select, Image } from "@chakra-ui/react";
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { parse, isAfter, isValid } from 'date-fns';
 import React, { useEffect } from "react";
 import classes from "./NodeModal.module.css"
+
+const parseDate = (value, originalValue) => {
+  const formats = ['dd/MM/yyyy', 'yyyy', 'MM/yyyy'];
+  let date = null;
+
+  for (const formatStr of formats) {
+    date = parse(originalValue, formatStr, new Date());
+    if (isValid(date)) {
+      return date;
+    }
+  }
+
+  return new Date('');
+};
 
 const schema = yup.object().shape({
   name: yup.string()
     .required('Họ tên người dùng là bắt buộc')
     .max(50, 'Họ tên không được vượt quá 50 ký tự'),
+  dateOfBirth: yup.string()
+    .test(
+      'is-valid-date',
+      'Ngày sinh không hợp lệ',
+      function (value) {
+        const date = parseDate(value, value);
+        return isValid(date);
+      }
+    ),
   gender: yup.string().required('Giới tính là bắt buộc'),
   isAlive: yup.string().required('Tình trạng là bắt buộc'),
   deathOfBirth: yup.string()
@@ -29,8 +53,9 @@ const schema = yup.object().shape({
       function (value) {
         const { dateOfBirth, isAlive } = this.parent;
         if (isAlive === 'false' && value) {
-          // return value > dateOfBirth;
-          return new Date(value) > new Date(dateOfBirth);
+          const dateOfBirthParsed = parseDate(dateOfBirth, dateOfBirth);
+          const deathOfBirthParsed = parseDate(value, value);
+          return isAfter(deathOfBirthParsed, dateOfBirthParsed);
         }
         return true;
       }
@@ -133,7 +158,7 @@ const NodeModalEditInfo = ({ isOpen, onClose, onSubmit, initialData }) => {
               />
             </FormControl>
             <FormControl isInvalid={errors.dateOfBirth}>
-              <FormLabel>Ngày sinh</FormLabel>
+              <FormLabel>Ngày sinh (Nhập theo định dạng ngày/tháng/năm)</FormLabel>
               <Input
                 type="text"
                 name="dateOfBirth"
@@ -153,18 +178,20 @@ const NodeModalEditInfo = ({ isOpen, onClose, onSubmit, initialData }) => {
               </Select>
               {errors.gender && <p className={classes.error}>{errors.gender.message}</p>}
             </FormControl>
-            <FormControl isInvalid={errors.relationship}>
-              <FormLabel>Quan hệ</FormLabel>
-              <Select
-                placeholder=" "
-                name="relationship"
-                {...register('relationship')}
-              >
-                <option value="Con đẻ">Con đẻ</option>
-                <option value="Con nuôi">Con nuôi</option>
-              </Select>
-              {errors.relationship && <p className={classes.error}>{errors.relationship.message}</p>}
-            </FormControl>
+            {!initialData?.isAncestor && (
+              <FormControl isInvalid={errors.relationship}>
+                <FormLabel>Quan hệ</FormLabel>
+                <Select
+                  placeholder=" "
+                  name="relationship"
+                  {...register('relationship')}
+                >
+                  <option value="Con đẻ">Con đẻ</option>
+                  <option value="Con nuôi">Con nuôi</option>
+                </Select>
+                {errors.relationship && <p className={classes.error}>{errors.relationship.message}</p>}
+              </FormControl>
+            )}
             <FormControl isInvalid={errors.isAlive}>
               <FormLabel>Tình trạng</FormLabel>
               <Select
@@ -179,7 +206,7 @@ const NodeModalEditInfo = ({ isOpen, onClose, onSubmit, initialData }) => {
             </FormControl>
             {isAlive === 'false' ? (
               <FormControl>
-                <FormLabel>Ngày mất</FormLabel>
+                <FormLabel>Ngày mất (Nhập theo định dạng ngày/tháng/năm)</FormLabel>
                 <Input
                   type="text"
                   name="deathOfBirth"

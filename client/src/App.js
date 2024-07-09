@@ -6,6 +6,7 @@ import Login from './components/login/Login'
 import Register from './components/register/Register'
 import ForgotPassword from './components/ForgotPassword/ForgotPassword'
 import ResetPassword from './components/ResetPassword/ResetPassword'
+import PreviewModal from './components/PreviewModal/PreviewModal';
 import Home from './components/home/Home'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path='/reset-password/:token' element={ !user ? <ResetPassword /> : <Navigate to='/home' />} />
         <Route path='/home' element={ user ? <Home /> : <Navigate to='/login' />} />
         <Route path='/home/:familyTreeId' element={ user ? <Home /> : <Navigate to='/login' />} />
+        <Route path='/home/preview/:familyTreeId' element={ <PreviewModal /> } />
      </Routes>
     </div>
   );

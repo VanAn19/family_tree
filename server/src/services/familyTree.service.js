@@ -31,7 +31,7 @@ class FamilyTreeService {
         });
         if (foundTree) throw new BadRequestError('Family tree name already exists!');
         const newFamilyTree = await FamilyTree.create({ name, userCreateId, ancestorName });
-        await FamilyMember.create({ name: ancestorName, gender: "Nam", familyTreeId: newFamilyTree.id, relationship: "Tổ tiên", isAncestor: true });
+        await FamilyMember.create({ name: ancestorName, gender: "Nam", familyTreeId: newFamilyTree.id, relationship: "Tổ tiên", isAncestor: true, isAlive: true });
         return newFamilyTree
     }
 

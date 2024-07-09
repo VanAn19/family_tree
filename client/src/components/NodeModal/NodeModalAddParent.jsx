@@ -34,7 +34,15 @@ const schema = yup.object().shape({
   name: yup.string()
     .required('Họ tên là bắt buộc')
     .max(50, 'Họ tên không được vượt quá 50 ký tự'),
-  // dateOfBirth: yup.date().required('Ngày sinh là bắt buộc'),
+  dateOfBirth: yup.string()
+    .test(
+      'is-valid-date',
+      'Ngày sinh không hợp lệ',
+      function (value) {
+        const date = parseDate(value, value);
+        return isValid(date);
+      }
+    ),
   gender: yup.string().required('Giới tính là bắt buộc'),
   isAlive: yup.string().required('Tình trạng là bắt buộc'),
   deathOfBirth: yup.string()
@@ -123,7 +131,7 @@ const NodeModalAddParent = ({ isOpen, onClose, onSubmit }) => {
               />
             </FormControl>
             <FormControl isInvalid={errors.dateOfBirth}>
-              <FormLabel>Ngày sinh</FormLabel>
+              <FormLabel>Ngày sinh (Nhập theo định dạng ngày/tháng/năm)</FormLabel>
               <Input
                 type="text"
                 name="dateOfBirth"
@@ -170,7 +178,7 @@ const NodeModalAddParent = ({ isOpen, onClose, onSubmit }) => {
             </FormControl>
             {isAlive === 'false' ? (
               <FormControl>
-                <FormLabel>Ngày mất</FormLabel>
+                <FormLabel>Ngày mất (Nhập theo định dạng ngày/tháng/năm)</FormLabel>
                 <Input
                   type="text"
                   name="deathOfBirth"

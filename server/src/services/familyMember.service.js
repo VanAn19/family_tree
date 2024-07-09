@@ -151,7 +151,7 @@ class FamilyMemberService {
                 job,
                 isAlive,
                 deathOfBirth,
-                age: birthDayAge
+                age
             });
         }
         await foundMember.update({
