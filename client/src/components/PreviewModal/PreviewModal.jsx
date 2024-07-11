@@ -3,6 +3,8 @@ import axios from "axios";
 import { Box, Stack } from "@chakra-ui/layout";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@chakra-ui/react"; 
+import { LinkIcon } from '@chakra-ui/icons'
+import { useSelector } from "react-redux";
 import images from "../../assets";
 
 const Tree = lazy(() => import("react-d3-tree"));
@@ -40,6 +42,7 @@ const PreviewModal = () => {
 
   const [tree, setTree] = useState(null);
   const [avatars, setAvatars] = useState(null);
+  const { user } = useSelector(state => state.auth);
   const { familyTreeId } = useParams();  
 
   const fetchFamilyTree = async (familyTreeId) => {
@@ -59,6 +62,13 @@ const PreviewModal = () => {
     } catch (error) {
       console.error("Error fetching avatar:", error);
     }
+  };
+
+  const shareLink = `${window.location.origin}/preview/${familyTreeId}`;
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(shareLink);
+    alert('Copy đường dẫn thành công');
   };
 
   useEffect(() => {
@@ -110,7 +120,10 @@ const PreviewModal = () => {
             }
           }
         })}
-        {nodeDatum.isAlive == false && renderStripes(0, 0, 115)}
+        {/* {nodeDatum.isAlive == false && renderStripes(0, 0, 115)} */}
+        {nodeDatum.isAlive == false && (
+          <image href={images.rip} width="60" height="150" x="-58" y="-80" />
+        )}
         <foreignObject x="-125" y="30" width="250" height="30">
           <div
             xmlns="http://www.w3.org/1999/xhtml"
@@ -151,7 +164,10 @@ const PreviewModal = () => {
               }
             }
           })}
-          {nodeDatum.partner.isAlive == false && renderStripes(0, 0, 115)}
+          {/* {nodeDatum.partner.isAlive == false && renderStripes(0, 0, 115)} */}
+          {nodeDatum.partner.isAlive == false && (
+            <image href={images.rip} width="60" height="150" x="-58" y="-80" />
+          )}
           <foreignObject x="-125" y="30" width="250" height="30">
             <div
               xmlns="http://www.w3.org/1999/xhtml"
@@ -184,6 +200,18 @@ const PreviewModal = () => {
       <Box w="100%" h="100vh">
         {tree && (
           <Suspense fallback={<div>Loading...</div>}>
+            {user ? (
+              <Box>
+                <Button as={Link} to={`/home/${familyTreeId}`} colorScheme="teal" position="absolute" top="20px" right="20px">
+                  Back
+                </Button>
+                <Button onClick={handleShare} colorScheme="blue" position="absolute" top="90vh" right="20px">
+                  <LinkIcon mr="5px" /> Copy link
+                </Button>
+              </Box> 
+            ) : (
+                <h1 style={{textAlign: "center", color: "#000", marginTop: "5px"}}>Bạn đang ở chế độ xem.</h1>
+            )}
             <Tree
               data={tree}
               zoomable
@@ -199,9 +227,9 @@ const PreviewModal = () => {
           </Suspense>
         )}
       </Box>
-      <Button as={Link} to={`/home/${familyTreeId}`} colorScheme="teal" position="absolute" top="20px" right="20px">
+      {/* <Button as={Link} to={`/home/${familyTreeId}`} colorScheme="teal" position="absolute" top="20px" right="20px">
         Back
-      </Button>
+      </Button> */}
     </Stack>
   );
 }

@@ -21,7 +21,7 @@ function App() {
         <Route path='/reset-password/:token' element={ !user ? <ResetPassword /> : <Navigate to='/home' />} />
         <Route path='/home' element={ user ? <Home /> : <Navigate to='/login' />} />
         <Route path='/home/:familyTreeId' element={ user ? <Home /> : <Navigate to='/login' />} />
-        <Route path='/home/preview/:familyTreeId' element={ <PreviewModal /> } />
+        <Route path='/preview/:familyTreeId' element={ <PreviewModal /> } />
      </Routes>
     </div>
   );

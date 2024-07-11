@@ -7,12 +7,11 @@ import NodeModalAddPartner from "../NodeModal/NodeModalAddPartner";
 import NodeModalAddChild from "../NodeModal/NodeModalAddChild";
 import NodeModalEditInfo from "../NodeModal/NodeModalEditInfo";
 import NodeContextMenu from "../NodeContextMenu/NodeContextMenu";
-import PreviewModal from "../PreviewModal/PreviewModal";
 import NavBar from "../navbar/NavBar";
 import { useSelector } from "react-redux";
 import { useParams, Link } from "react-router-dom";
 import { useDisclosure, Button } from "@chakra-ui/react"; 
-import classes from "./home.module.css"
+import classes from "../login/login.module.css"
 import images from "../../assets";
 
 const Tree = lazy(() => import("react-d3-tree"));
@@ -84,6 +83,7 @@ const Home = () => {
   const [isAddChildModalOpen, setIsAddChildModalOpen] = useState(false);
   const [isEditInfoModalOpen, setIsEditInfoModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [errors, setErrors] = useState(false);
   const { user, token } = useSelector(state => state.auth);
   const { familyTreeId } = useParams(); 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -91,10 +91,10 @@ const Home = () => {
   const fetchFamilyTree = async (familyTreeId) => {
     try {
       const response = await axios.get(`http://localhost:4000/v1/api/family-member/${familyTreeId}`, {
-        headers: {
-          "x-client-id": `${user.id}`,
-          "Authorization": `${token}`
-        }
+        // headers: {
+        //   "x-client-id": `${user.id}`,
+        //   "Authorization": `${token}`
+        // }
       });
       const convertedTree = convertToTree(response.data.metadata);
       setTree(convertedTree);
@@ -161,7 +161,7 @@ const Home = () => {
   
   const handleSubmitAddPartner = async (formData) => {
     try {
-      await axios.post(`http://localhost:4000/v1/api/family-member/${familyTreeId}/add-partner`,
+      const res = await axios.post(`http://localhost:4000/v1/api/family-member/${familyTreeId}/add-partner`,
         {
           ...formData,
           familyTreeId,
@@ -193,7 +193,7 @@ const Home = () => {
 
   const handleSubmitAddChild = async (formData) => {
     try {
-      await axios.post(`http://localhost:4000/v1/api/family-member/${familyTreeId}/add-child`,
+      const res = await axios.post(`http://localhost:4000/v1/api/family-member/${familyTreeId}/add-child`,
   {
           ...formData,
           familyTreeId,
@@ -290,14 +290,6 @@ const Home = () => {
     }
     return text.substring(0, maxLength) + '...';
   }
-
-  const renderStripes = (x, y, width) => (
-    <>
-      <path d={`M${x - width / 2},${y - 70} C${x - width / 4},${y - 55} ${x + width / 4},${y - 55} ${x + width / 2},${y - 70}`} stroke="gray" strokeWidth="2" fill="none" />
-      <path d={`M${x - width / 2},${y - 65} C${x - width / 4},${y - 50} ${x + width / 4},${y - 50} ${x + width / 2},${y - 65}`} stroke="gray" strokeWidth="2" fill="none" />
-      <path d={`M${x - width / 2},${y - 60} C${x - width / 4},${y - 45} ${x + width / 4},${y - 45} ${x + width / 2},${y - 60}`} stroke="gray" strokeWidth="2" fill="none" />
-    </>
-  );
   
   const renderRectSvgNode = ({ nodeDatum }, click) => (
     <g>
@@ -326,7 +318,9 @@ const Home = () => {
             }
           }
         })}
-        {nodeDatum.isAlive == false && renderStripes(0, 0, 115)}
+        {nodeDatum.isAlive == false && (
+          <image href={images.rip} width="60" height="150" x="-58" y="-80" />
+        )}
         <foreignObject x="-125" y="30" width="250" height="30">
           <div
             xmlns="http://www.w3.org/1999/xhtml"
@@ -367,7 +361,10 @@ const Home = () => {
               }
             }
           })}
-          {nodeDatum.partner.isAlive == false && renderStripes(0, 0, 115)}
+          {/* {nodeDatum.partner.isAlive == false && renderStripes(0, 0, 115)} */}
+          {nodeDatum.isAlive == false && (
+            <image href={images.rip} width="60" height="150" x="-58" y="-80" />
+          )}
           <foreignObject x="-125" y="30" width="250" height="30">
             <div
               xmlns="http://www.w3.org/1999/xhtml"
@@ -399,9 +396,9 @@ const Home = () => {
     <Stack direction="row" spacing="md" bg="#e8c77b">
       <NavBar />
       <Box w="100%" h="100vh">
-        <Button as={Link} to={`/home/preview/${familyTreeId}`} colorScheme="teal" position="absolute" top="20px" right="20px">
+        {/* <Button as={Link} to={`/preview/${familyTreeId}`} colorScheme="teal" position="absolute" top="20px" right="20px">
           Preview
-        </Button>
+        </Button> */}
         {tree ? (
           <Suspense fallback={<div>Loading...</div>}>
             <Tree
@@ -417,6 +414,9 @@ const Home = () => {
                 renderRectSvgNode(nodeInfo, handleNodeClick)
               }
             />
+            <Button as={Link} to={`/preview/${familyTreeId}`} colorScheme="teal" position="absolute" top="20px" right="20px">
+              Preview
+            </Button>
           </Suspense>
         ) : (
           <h1 style={{textAlign: "center", color: "#000", marginTop: "100px"}}>Chọn cây của bạn, nếu chưa có hãy tạo mới.</h1>
@@ -463,12 +463,12 @@ const Home = () => {
           onSubmit={handleEditInfo}
           initialData={node}
         />
-        <PreviewModal
-          isOpen={isPreviewOpen}
-          onClose={closePreviewModal}
-          treeData={tree}
-        />
       </Box>
+      {errors && 
+        <div className={classes.errorMessage}>
+          Vợ/chồng đã tồn tại! Vui lòng thử lại.
+        </div>
+      }
     </Stack>
   );
 };
