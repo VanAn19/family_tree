@@ -10,18 +10,12 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     login(state, action) {
-      // localStorage.clear()
-      // state.user = action.payload.metadata.user
-      // state.token = action.payload.metadata.tokens.accessToken
       localStorage.clear();
       const { user, tokens } = action.payload.metadata; 
       state.user = user;
       state.token = tokens.accessToken;
     },
     register(state, action) {
-      // localStorage.clear()
-      // state.user = action.payload.metadata.user
-      // state.token = action.payload.metadata.tokens.accessToken
       localStorage.clear();
       const { user, tokens } = action.payload.metadata; 
       state.user = user;

@@ -106,7 +106,7 @@ const NodeModalEditInfo = ({ isOpen, onClose, onSubmit, initialData }) => {
     }
   }, [initialData, setValue]);
 
-  const isAlive = watch('isAlive');
+  const isAliveValue = watch('isAlive');
 
   const handleFormSubmit = (data) => {
     const formData = {
@@ -116,6 +116,13 @@ const NodeModalEditInfo = ({ isOpen, onClose, onSubmit, initialData }) => {
     onSubmit(formData);
     reset();
   };
+
+  useEffect(() => {
+    if (isAliveValue === 'true') {
+      setValue('deathOfBirth', null);
+    }
+  }, [isAliveValue, setValue]);
+
 
   const handleClose = () => {
     reset(initialData);
@@ -204,14 +211,14 @@ const NodeModalEditInfo = ({ isOpen, onClose, onSubmit, initialData }) => {
               </Select>
               {errors.isAlive && <p className={classes.error}>{errors.isAlive.message}</p>}
             </FormControl>
-            {isAlive === 'false' ? (
+            {isAliveValue  === 'false' ? (
               <FormControl>
                 <FormLabel>Ngày mất (Nhập theo định dạng ngày/tháng/năm)</FormLabel>
                 <Input
                   type="text"
                   name="deathOfBirth"
                   {...register('deathOfBirth')}
-                  disabled={isAlive === 'true'}
+                  disabled={isAliveValue  === 'true'}
                 />
                 {errors.deathOfBirth && <p className={classes.error}>{errors.deathOfBirth.message}</p>}
               </FormControl>
