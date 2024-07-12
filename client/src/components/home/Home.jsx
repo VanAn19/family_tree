@@ -309,7 +309,19 @@ const Home = () => {
           if (data.id === nodeDatum.id) {
             if (data.avatar) {
               return (
-                <image key={data.id} href={`http://localhost:4000/${data.avatar}`} alt="" width="250" height="100" x="-125" y="-75" />
+                <image 
+                  key={data.id} 
+                  href={`http://localhost:4000/${data.avatar}`} 
+                  // alt="" className={classes.nodeImage} 
+                  // width="250" 
+                  // height="100" 
+                  // x="-125" 
+                  // y="-75" 
+                  width="100" 
+                  height="100" 
+                  x="-50" 
+                  y="-75" 
+                />
               )
             } else {
               return (
@@ -352,7 +364,19 @@ const Home = () => {
             if (data.id === nodeDatum.partner.id) {
               if (data.avatar) {
                 return (
-                  <image key={data.id} href={`http://localhost:4000/${data.avatar}`} alt="" width="250" height="100" x="-125" y="-75" />
+                  <image 
+                    key={data.id} 
+                    href={`http://localhost:4000/${data.avatar}`} 
+                    alt="" 
+                    // width="250" 
+                    // height="100" 
+                    // x="-125" 
+                    // y="-75" 
+                    width="100" 
+                    height="100" 
+                    x="-50" 
+                    y="-75" 
+                  />
                 )
               } else {
                 return (
